@@ -4,9 +4,13 @@
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",
-    "zip": "turbo zip"
+    "zip": "turbo zip",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write ."
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.4.10",
     "turbo": "^2"
   },
   "packageManager": "pnpm@10.8.0"
