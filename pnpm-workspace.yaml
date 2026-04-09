@@ -1,0 +1,7 @@
+packages:
+  - packages/*
+  - extensions/*
+
+ignoredBuiltDependencies:
+  - esbuild
+  - spawn-sync

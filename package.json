@@ -1,0 +1,13 @@
+{
+  "name": "browser-extensions",
+  "private": true,
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "zip": "turbo zip"
+  },
+  "devDependencies": {
+    "turbo": "^2"
+  },
+  "packageManager": "pnpm@10.8.0"
+}
