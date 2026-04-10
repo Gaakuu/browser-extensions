@@ -50,6 +50,6 @@ export const NoResults: Story = {
     const canvas = within(canvasElement);
     const input = canvas.getByTestId('search-input');
     await userEvent.type(input, 'zzzzz');
-    expect(canvas.getByText('noResults')).toBeInTheDocument();
+    expect(canvas.getByText('該当なし')).toBeInTheDocument();
   },
 };
