@@ -4,3 +4,8 @@ node_modules
 .wxt
 dist
 *.zip
+research/
+audit.log
+.spec-workflow/approvals/
+.spec-workflow/archive/
+.spec-workflow/templates/
