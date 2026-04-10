@@ -7,13 +7,18 @@ export default defineContentScript({
   async main() {
     let keyboardHandler: KeyboardHandler | null = null;
 
+    const closeOverlay = () => {
+      overlay.hide();
+      keyboardHandler?.destroy();
+      keyboardHandler = null;
+      chrome.runtime.sendMessage({ type: 'OVERLAY_CLOSED' });
+    };
+
     const overlay = new OverlayManager(
       // onSwitch
       (tabId) => {
         chrome.runtime.sendMessage({ type: 'SWITCH_TO_TAB', tabId });
-        overlay.hide();
-        keyboardHandler?.destroy();
-        keyboardHandler = null;
+        closeOverlay();
       },
       // onClose
       (tabId) => {
@@ -22,9 +27,7 @@ export default defineContentScript({
       },
       // onDismiss
       () => {
-        overlay.hide();
-        keyboardHandler?.destroy();
-        keyboardHandler = null;
+        closeOverlay();
       },
     );
 
@@ -33,18 +36,19 @@ export default defineContentScript({
         overlay.show('switcher', message.tabs);
 
         // キー押し続けモード: 修飾キーを離したら確定
-        keyboardHandler = new KeyboardHandler();
+        keyboardHandler = new KeyboardHandler(true);
         keyboardHandler.onModifierRelease(() => {
           if (overlay.isVisible()) {
-            // 現在フォーカスされているタブに切り替え
-            // TabSwitcher が Enter イベントを処理するので、Enter をシミュレート
-            window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+            overlay.confirmSelection();
           }
         });
       } else if (message.type === 'SHOW_SEARCH') {
+        // 検索モードは開きっぱなし（修飾キーリリースで閉じない）
         overlay.show('search', message.tabs);
       } else if (message.type === 'TAB_CLOSED') {
         overlay.removeTab(message.tabId);
+      } else if (message.type === 'MOVE_FOCUS_DOWN') {
+        overlay.moveFocusDown();
       }
     });
   },

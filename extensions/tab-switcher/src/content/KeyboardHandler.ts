@@ -6,7 +6,13 @@ export class KeyboardHandler {
   private handleKeyDown: (e: KeyboardEvent) => void;
   private handleKeyUp: (e: KeyboardEvent) => void;
 
-  constructor() {
+  constructor(assumeModifiersHeld = false) {
+    // ショートカットで起動された場合、修飾キーは既に押されている
+    if (assumeModifiersHeld) {
+      this.modifiersPressed.add('Meta');
+      this.modifiersPressed.add('Shift');
+    }
+
     this.handleKeyDown = (e: KeyboardEvent) => {
       if (MODIFIER_KEYS.has(e.key)) {
         this.modifiersPressed.add(e.key);

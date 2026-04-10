@@ -4,7 +4,7 @@ import { CssBaseline, ThemeProvider, darkTheme } from '@browser-extensions/ui';
 import { createRoot, type Root } from 'react-dom/client';
 import type { TabInfo } from '../types/messages';
 import { SearchOverlay } from '../components/SearchOverlay';
-import { TabSwitcher } from '../components/TabSwitcher';
+import { TabSwitcher, type TabSwitcherHandle } from '../components/TabSwitcher';
 
 interface OverlayState {
   mode: 'switcher' | 'search';
@@ -16,6 +16,8 @@ export class OverlayManager {
   private shadowRoot: ShadowRoot | null = null;
   private root: Root | null = null;
   private state: OverlayState | null = null;
+  private switcherHandle: TabSwitcherHandle | null = null;
+  private pendingActions: Array<() => void> = [];
   private onSwitch: (tabId: number) => void;
   private onClose: (tabId: number) => void;
   private onDismiss: () => void;
@@ -32,6 +34,7 @@ export class OverlayManager {
 
   show(mode: 'switcher' | 'search', tabs: TabInfo[]): void {
     this.state = { mode, tabs };
+    this.switcherHandle = null;
 
     if (!this.host) {
       this.createHost();
@@ -46,10 +49,27 @@ export class OverlayManager {
       this.host.style.display = 'none';
     }
     this.state = null;
+    this.switcherHandle = null;
   }
 
   isVisible(): boolean {
     return this.host?.style.display === 'flex';
+  }
+
+  moveFocusDown(): void {
+    if (this.switcherHandle) {
+      this.switcherHandle.moveFocusDown();
+    } else {
+      this.pendingActions.push(() => this.switcherHandle?.moveFocusDown());
+    }
+  }
+
+  confirmSelection(): void {
+    if (this.switcherHandle) {
+      this.switcherHandle.confirmSelection();
+    } else {
+      this.pendingActions.push(() => this.switcherHandle?.confirmSelection());
+    }
   }
 
   updateTabs(tabs: TabInfo[]): void {
@@ -122,6 +142,13 @@ export class OverlayManager {
               onSwitch={this.onSwitch}
               onClose={this.onClose}
               onDismiss={this.onDismiss}
+              onReady={(handle) => {
+                this.switcherHandle = handle;
+                for (const action of this.pendingActions) {
+                  action();
+                }
+                this.pendingActions = [];
+              }}
             />
           ) : (
             <SearchOverlay

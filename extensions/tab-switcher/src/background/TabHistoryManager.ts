@@ -44,6 +44,15 @@ export class TabHistoryManager {
       tab.title = title;
       tab.url = url;
       tab.favIconUrl = favIconUrl;
+    } else {
+      // 新規タブの場合は追加
+      this.tabs.set(tabId, {
+        id: tabId,
+        title,
+        url,
+        favIconUrl,
+        lastAccessed: Date.now(),
+      });
     }
   }
 

@@ -3,14 +3,21 @@ import { useCallback, useEffect, useState } from 'react';
 import type { TabInfo } from '../types/messages';
 import { TabCard } from './TabCard';
 
+export interface TabSwitcherHandle {
+  moveFocusDown: () => void;
+  moveFocusUp: () => void;
+  confirmSelection: () => void;
+}
+
 interface TabSwitcherProps {
   tabs: TabInfo[];
   onSwitch: (tabId: number) => void;
   onClose: (tabId: number) => void;
   onDismiss: () => void;
+  onReady?: (handle: TabSwitcherHandle) => void;
 }
 
-export function TabSwitcher({ tabs, onSwitch, onClose, onDismiss }: TabSwitcherProps) {
+export function TabSwitcher({ tabs, onSwitch, onClose, onDismiss, onReady }: TabSwitcherProps) {
   const [focusIndex, setFocusIndex] = useState(0);
 
   const moveDown = useCallback(() => {
@@ -70,6 +77,15 @@ export function TabSwitcher({ tabs, onSwitch, onClose, onDismiss }: TabSwitcherP
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [moveDown, moveUp, confirm, onDismiss]);
+
+  // 外部からの操作ハンドルを公開
+  useEffect(() => {
+    onReady?.({
+      moveFocusDown: moveDown,
+      moveFocusUp: moveUp,
+      confirmSelection: confirm,
+    });
+  }, [onReady, moveDown, moveUp, confirm]);
 
   // focusIndex が範囲外にならないよう補正
   useEffect(() => {
