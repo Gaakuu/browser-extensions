@@ -67,6 +67,7 @@ export function SearchOverlay({ tabs, onSwitch, onClose, onDismiss }: SearchOver
         maxHeight: 400,
         overflow: 'hidden',
         borderRadius: 2,
+        mt: '4px',
         display: 'flex',
         flexDirection: 'column',
       }}

@@ -93,6 +93,7 @@ export function TabSwitcher({ tabs, onSwitch, onClose, onDismiss, onReady }: Tab
         maxHeight: 400,
         overflow: 'auto',
         borderRadius: 2,
+        mt: '4px',
       }}
       data-testid="tab-switcher"
     >

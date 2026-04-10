@@ -43,12 +43,14 @@ export class OverlayManager {
     }
 
     this.host!.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
     this.render();
   }
 
   hide(): void {
     if (this.host) {
       this.host.style.display = 'none';
+      document.body.style.overflow = '';
     }
     this.state = null;
     this.switcherHandle = null;
@@ -99,7 +101,7 @@ export class OverlayManager {
       height: 100vh;
       display: none;
       justify-content: center;
-      align-items: center;
+      align-items: flex-start;
       background: rgba(0, 0, 0, 0.5);
       z-index: 2147483647;
       box-sizing: border-box;
