@@ -50,7 +50,7 @@
   - _要件: 要件2, 要件3_
   - _Prompt: Implement the task for spec tab-switcher, first run spec-workflow-guide to get the workflow guide then implement the task: Role: テストエンジニア（TDD） | Task: TabHistoryManager のユニットテストを先に書く。chrome.tabs API はモックする。MRUソート、タブの追加/削除/更新、初期化の全パターンをカバー | Restrictions: テストを先に書き、この時点では実装ファイルは空またはインターフェースのみ。Red（失敗）の状態で終わってよい | Success: テストが要件を正しく表現している。実装すれば全てパスする内容になっている_
 
-- [-] 7. TabHistoryManager の実装
+- [x] 7. TabHistoryManager の実装
   - ファイル: `extensions/tab-switcher/src/background/TabHistoryManager.ts`
   - タスク6のテストを全てパスさせる
   - _活用: タスク6のテスト_

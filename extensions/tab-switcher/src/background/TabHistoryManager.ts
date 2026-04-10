@@ -1,27 +1,53 @@
 import type { TabInfo } from '../types/messages';
 
 export class TabHistoryManager {
+  private tabs = new Map<number, TabInfo>();
+
   async init(): Promise<void> {
-    throw new Error('Not implemented');
+    const existingTabs = await chrome.tabs.query({});
+    const now = Date.now();
+    for (const tab of existingTabs) {
+      if (tab.id == null) continue;
+      this.tabs.set(tab.id, {
+        id: tab.id,
+        title: tab.title ?? '',
+        url: tab.url ?? '',
+        favIconUrl: tab.favIconUrl ?? '',
+        lastAccessed: now,
+      });
+    }
   }
 
-  getRecentTabs(_limit?: number): TabInfo[] {
-    throw new Error('Not implemented');
+  getRecentTabs(limit?: number): TabInfo[] {
+    const sorted = this.sortByMRU();
+    return limit != null ? sorted.slice(0, limit) : sorted;
   }
 
   getAllTabs(): TabInfo[] {
-    throw new Error('Not implemented');
+    return this.sortByMRU();
   }
 
-  onTabActivated(_tabId: number): void {
-    throw new Error('Not implemented');
+  onTabActivated(tabId: number): void {
+    const tab = this.tabs.get(tabId);
+    if (tab) {
+      tab.lastAccessed = Date.now();
+    }
   }
 
-  onTabRemoved(_tabId: number): void {
-    throw new Error('Not implemented');
+  onTabRemoved(tabId: number): void {
+    this.tabs.delete(tabId);
   }
 
-  onTabUpdated(_tabId: number, _title: string, _url: string, _favIconUrl: string): void {
-    throw new Error('Not implemented');
+  onTabUpdated(tabId: number, title: string, url: string, favIconUrl: string): void {
+    const tab = this.tabs.get(tabId);
+    if (tab) {
+      tab.title = title;
+      tab.url = url;
+      tab.favIconUrl = favIconUrl;
+    }
+  }
+
+  private sortByMRU(): TabInfo[] {
+    return [...this.tabs.values()].sort((a, b) => b.lastAccessed - a.lastAccessed);
   }
 }

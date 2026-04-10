@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { TabHistoryManager } from './TabHistoryManager';
 
 // chrome.tabs API のモック
@@ -19,11 +19,18 @@ vi.stubGlobal('chrome', {
 
 describe('TabHistoryManager', () => {
   let manager: TabHistoryManager;
+  let now: number;
 
   beforeEach(async () => {
     vi.clearAllMocks();
+    vi.useFakeTimers();
+    now = Date.now();
     manager = new TabHistoryManager();
     await manager.init();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   describe('init', () => {
@@ -39,13 +46,15 @@ describe('TabHistoryManager', () => {
       vi.advanceTimersByTime(100);
       manager.onTabActivated(1);
       const after = manager.getAllTabs().find((t) => t.id === 1)?.lastAccessed;
-      expect(after).toBeGreaterThanOrEqual(before!);
+      expect(after).toBeGreaterThan(before!);
     });
   });
 
   describe('getRecentTabs', () => {
     it('MRU順で返す（最近アクセスしたものが先頭）', () => {
+      vi.advanceTimersByTime(10);
       manager.onTabActivated(3);
+      vi.advanceTimersByTime(10);
       manager.onTabActivated(1);
 
       const tabs = manager.getRecentTabs();
@@ -61,8 +70,11 @@ describe('TabHistoryManager', () => {
 
   describe('getAllTabs', () => {
     it('全タブをMRU順で返す', () => {
+      vi.advanceTimersByTime(10);
       manager.onTabActivated(2);
+      vi.advanceTimersByTime(10);
       manager.onTabActivated(3);
+      vi.advanceTimersByTime(10);
       manager.onTabActivated(1);
 
       const tabs = manager.getAllTabs();
@@ -90,7 +102,9 @@ describe('TabHistoryManager', () => {
     });
 
     it('メタデータ更新ではMRU順は変わらない', () => {
+      vi.advanceTimersByTime(10);
       manager.onTabActivated(1);
+      vi.advanceTimersByTime(10);
       manager.onTabActivated(2);
 
       const beforeOrder = manager.getAllTabs().map((t) => t.id);
