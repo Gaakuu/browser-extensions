@@ -147,14 +147,19 @@ export class OverlayManager {
         e.stopPropagation();
       }
     };
-    document.addEventListener('keydown', blockKeyEvent);
-    document.addEventListener('keyup', blockKeyEvent);
+    document.addEventListener('keydown', blockKeyEvent, true);
+    document.addEventListener('keyup', blockKeyEvent, true);
 
-    // オーバーレイ表示中は背景のスクロールを防止
+    // オーバーレイ表示中は背景のスクロールを防止（Shadow DOM 内のスクロールは許可）
     document.addEventListener(
       'wheel',
       (e) => {
-        if (this.isVisible() && !this.shadowRoot?.contains(e.target as Node)) {
+        if (!this.isVisible()) return;
+        const path = e.composedPath();
+        const isInsideOverlay = path.some(
+          (el) => el === this.host || (el instanceof Node && this.shadowRoot?.contains(el)),
+        );
+        if (!isInsideOverlay) {
           e.preventDefault();
         }
       },
