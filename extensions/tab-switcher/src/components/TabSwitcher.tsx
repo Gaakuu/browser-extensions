@@ -1,5 +1,5 @@
 import { List, Paper } from '@mui/material';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { TabInfo } from '../types/messages';
 import { TabCard } from './TabCard';
 
@@ -19,6 +19,7 @@ interface TabSwitcherProps {
 
 export function TabSwitcher({ tabs, onSwitch, onClose, onDismiss, onReady }: TabSwitcherProps) {
   const [focusIndex, setFocusIndex] = useState(tabs.length > 1 ? 1 : 0);
+  const listRef = useRef<HTMLUListElement>(null);
 
   const moveDown = useCallback(() => {
     setFocusIndex((prev) => (prev + 1) % tabs.length);
@@ -78,6 +79,14 @@ export function TabSwitcher({ tabs, onSwitch, onClose, onDismiss, onReady }: Tab
     });
   }, [onReady, moveDown, moveUp, confirm]);
 
+  // フォーカスされたアイテムが見切れたら自動スクロール
+  useEffect(() => {
+    const listEl = listRef.current;
+    if (!listEl) return;
+    const focusedItem = listEl.children[focusIndex] as HTMLElement | undefined;
+    focusedItem?.scrollIntoView({ block: 'nearest' });
+  }, [focusIndex]);
+
   // focusIndex が範囲外にならないよう補正
   useEffect(() => {
     if (focusIndex >= tabs.length && tabs.length > 0) {
@@ -91,13 +100,13 @@ export function TabSwitcher({ tabs, onSwitch, onClose, onDismiss, onReady }: Tab
       sx={{
         width: 480,
         maxHeight: 400,
-        overflow: 'auto',
+        overflow: 'hidden',
         borderRadius: 2,
         mt: '4px',
       }}
       data-testid="tab-switcher"
     >
-      <List dense sx={{ py: 0.5 }}>
+      <List ref={listRef} dense sx={{ py: 0.5, overflow: 'auto', maxHeight: 400 }}>
         {tabs.map((tab, index) => (
           <TabCard
             key={tab.id}

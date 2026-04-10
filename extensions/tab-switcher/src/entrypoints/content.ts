@@ -31,6 +31,13 @@ export default defineContentScript({
       },
     );
 
+    // ページ離脱時にオーバーレイを閉じる
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden && overlay.isVisible()) {
+        closeOverlay();
+      }
+    });
+
     chrome.runtime.onMessage.addListener((message: BackgroundMessage) => {
       if (message.type === 'SHOW_SWITCHER') {
         overlay.show('switcher', message.tabs);

@@ -1,6 +1,6 @@
 import createCache from '@emotion/cache';
 import { CacheProvider } from '@emotion/react';
-import { CssBaseline, ThemeProvider, darkTheme } from '@browser-extensions/ui';
+import { CssBaseline, ThemeProvider, createTheme, darkThemeOptions } from '@browser-extensions/ui';
 import { createRoot, type Root } from 'react-dom/client';
 import type { TabInfo } from '../types/messages';
 import { SearchOverlay } from '../components/SearchOverlay';
@@ -112,9 +112,13 @@ export class OverlayManager {
 
     this.shadowRoot = this.host.attachShadow({ mode: 'open' });
 
-    // Shadow DOM 内の CSS リセット（box-sizing のみ、MUI のスタイルを壊さない）
+    // Shadow DOM 内の CSS リセット
+    // ホストページの font-size (例: 62.5%) が rem 計算に影響するため、基準値を固定する
     const resetStyle = document.createElement('style');
     resetStyle.textContent = `
+      :host {
+        font-size: 16px;
+      }
       *, *::before, *::after {
         box-sizing: border-box;
       }
@@ -175,14 +179,28 @@ export class OverlayManager {
 
   private emotionCache: ReturnType<typeof createCache> | null = null;
 
+  private getTheme() {
+    // ホストページの html font-size が標準(16px)と異なる場合、MUI の rem 計算を補正する
+    // テーマオプションから新規生成しないと pxToRem 関数が再計算されない
+    const htmlFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+    return createTheme({
+      ...darkThemeOptions,
+      typography: {
+        ...(darkThemeOptions.typography as object),
+        htmlFontSize,
+      },
+    });
+  }
+
   private render(): void {
     if (!this.root || !this.state || !this.emotionCache) return;
 
     const { mode, tabs } = this.state;
+    const theme = this.getTheme();
 
     this.root.render(
       <CacheProvider value={this.emotionCache}>
-        <ThemeProvider theme={darkTheme}>
+        <ThemeProvider theme={theme}>
           <CssBaseline />
           {mode === 'switcher' ? (
             <TabSwitcher
