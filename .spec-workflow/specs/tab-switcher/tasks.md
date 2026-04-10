@@ -29,7 +29,7 @@
   - _要件: 非機能要件_
   - _Prompt: Implement the task for spec tab-switcher, first run spec-workflow-guide to get the workflow guide then implement the task: Role: テストエンジニア | Task: Vitest + @testing-library/react + jsdom をセットアップ。tab-switcher と packages/ui それぞれに vitest.config.ts を作成。package.json に test スクリプトを追加 | Restrictions: 既存のビルド設定を壊さない | Success: `pnpm test` で空のテストスイートが正常に実行される_
 
-- [-] 5. Storybook のセットアップ
+- [x] 5. Storybook のセットアップ
   - ファイル: `extensions/tab-switcher/.storybook/main.ts`, `extensions/tab-switcher/.storybook/preview.ts`
   - Storybook + React + MUI テーマの設定
   - @browser-extensions/ui のテーマを Storybook の decorator で適用
