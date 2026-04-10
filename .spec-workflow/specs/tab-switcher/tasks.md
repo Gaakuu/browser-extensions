@@ -98,7 +98,7 @@
   - _要件: 要件1, 要件3, 要件4, 要件5_
   - _Prompt: Implement the task for spec tab-switcher, first run spec-workflow-guide to get the workflow guide then implement the task: Role: Reactフロントエンドエンジニア（TDD） | Task: まずTabSwitcherのStoryを作成し、play関数にキーボード操作のインタラクションテストを書く（↑↓循環、Space、Enter確定、Escape閉じ、タブ閉じ後のフォーカス移動）。バリアントは Default(5件), SingleTab, ManyTabs(20件)。次にMUI List+Paperで実装 | Restrictions: テストは play 関数内に書く。@storybook/test を使用。フォーカスはuseState、キーイベントはuseEffect | Success: Vitest で Story のテストが全てパス。全キーボード操作が仕様通り_
 
-- [ ] 13. SearchOverlay コンポーネントの Story（play関数テスト付き）と実装
+- [x] 13. SearchOverlay コンポーネントの Story（play関数テスト付き）と実装
   - ファイル: `extensions/tab-switcher/src/components/SearchOverlay.stories.tsx`, `extensions/tab-switcher/src/components/SearchOverlay.tsx`
   - Story の play 関数にインタラクションテストを書く → コンポーネントを実装
   - Story バリアント: Default, Searching, NoResults
