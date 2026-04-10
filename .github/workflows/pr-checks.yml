@@ -29,5 +29,5 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec playwright install chromium
+      - run: pnpm --filter @browser-extensions/tab-switcher exec playwright install chromium
       - run: pnpm run test
