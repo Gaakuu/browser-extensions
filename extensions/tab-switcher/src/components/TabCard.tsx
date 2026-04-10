@@ -3,6 +3,7 @@ import { Avatar, IconButton, ListItemAvatar, ListItemButton, ListItemText, Typog
 import type { HighlightRange } from '../types/messages';
 import type { TabInfo } from '../types/messages';
 import type { MatchRange } from '../utils/fuzzyMatch';
+import { getMessage } from '../utils/i18n';
 
 interface TabCardProps {
   tab: TabInfo;
@@ -76,7 +77,7 @@ export function TabCard({ tab, isFocused, onSelect, onClose, highlights, highlig
           e.stopPropagation();
           onClose();
         }}
-        aria-label={`${tab.title}を閉じる`}
+        aria-label={getMessage('closeTab', [tab.title])}
         data-testid={`close-tab-${tab.id}`}
       >
         <CloseIcon fontSize="small" />

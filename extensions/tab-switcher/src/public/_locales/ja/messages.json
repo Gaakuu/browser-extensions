@@ -1,0 +1,28 @@
+{
+  "extName": {
+    "message": "Tab Switcher"
+  },
+  "extDescription": {
+    "message": "MRU順タブスイッチャー"
+  },
+  "commandShowTabSwitcher": {
+    "message": "タブ切り替えオーバーレイを表示"
+  },
+  "commandSearchTabs": {
+    "message": "タブ検索オーバーレイを表示"
+  },
+  "searchPlaceholder": {
+    "message": "タブを検索..."
+  },
+  "noResults": {
+    "message": "該当なし"
+  },
+  "closeTab": {
+    "message": "$TITLE$を閉じる",
+    "placeholders": {
+      "title": {
+        "content": "$1"
+      }
+    }
+  }
+}

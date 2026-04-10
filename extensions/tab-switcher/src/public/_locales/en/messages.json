@@ -1,0 +1,28 @@
+{
+  "extName": {
+    "message": "Tab Switcher"
+  },
+  "extDescription": {
+    "message": "MRU-order tab switcher"
+  },
+  "commandShowTabSwitcher": {
+    "message": "Show tab switcher overlay"
+  },
+  "commandSearchTabs": {
+    "message": "Show tab search overlay"
+  },
+  "searchPlaceholder": {
+    "message": "Search tabs..."
+  },
+  "noResults": {
+    "message": "No results"
+  },
+  "closeTab": {
+    "message": "Close $TITLE$",
+    "placeholders": {
+      "title": {
+        "content": "$1"
+      }
+    }
+  }
+}

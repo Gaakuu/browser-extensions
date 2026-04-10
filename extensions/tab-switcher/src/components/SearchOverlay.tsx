@@ -2,6 +2,7 @@ import { List, Paper, TextField, Typography } from '@mui/material';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { TabInfo } from '../types/messages';
 import { fuzzySearchTabs } from '../utils/fuzzyMatch';
+import { getMessage } from '../utils/i18n';
 import { TabCard } from './TabCard';
 
 interface SearchOverlayProps {
@@ -77,7 +78,7 @@ export function SearchOverlay({ tabs, onSwitch, onClose, onDismiss }: SearchOver
         inputRef={inputRef}
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="タブを検索..."
+        placeholder={getMessage('searchPlaceholder')}
         variant="outlined"
         size="small"
         fullWidth
@@ -99,7 +100,7 @@ export function SearchOverlay({ tabs, onSwitch, onClose, onDismiss }: SearchOver
           ))
         ) : (
           <Typography variant="body2" color="text.secondary" sx={{ p: 2, textAlign: 'center' }}>
-            該当なし
+            {getMessage('noResults')}
           </Typography>
         )}
       </List>
