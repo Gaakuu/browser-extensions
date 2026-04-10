@@ -36,11 +36,11 @@ export const Default: Story = {
 
 export const KeyboardNavigation: Story = {
   play: async ({ canvasElement, args }) => {
-    // ↓キーでフォーカスが移動
+    // 初期フォーカスは index=1 (Tab 2)、↓キーで index=2 (Tab 3) に移動
     await userEvent.keyboard('{ArrowDown}');
     // Enterで確定
     await userEvent.keyboard('{Enter}');
-    expect(args.onSwitch).toHaveBeenCalledWith(2); // 2番目のタブ
+    expect(args.onSwitch).toHaveBeenCalledWith(3);
   },
 };
 
