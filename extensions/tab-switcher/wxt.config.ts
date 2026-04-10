@@ -4,8 +4,9 @@ export default defineConfig({
   srcDir: 'src',
   modules: ['@wxt-dev/module-react'],
   manifest: {
-    name: 'Tab Switcher',
-    description: 'VSCode風のMRU順タブスイッチャー',
+    name: '__MSG_extName__',
+    description: '__MSG_extDescription__',
+    default_locale: 'en',
     permissions: ['tabs'],
     commands: {
       'show-tab-switcher': {
@@ -13,14 +14,14 @@ export default defineConfig({
           default: 'Ctrl+Shift+Space',
           mac: 'Command+Shift+Space',
         },
-        description: 'タブ切り替えオーバーレイを表示',
+        description: '__MSG_commandShowTabSwitcher__',
       },
       'search-tabs': {
         suggested_key: {
           default: 'Ctrl+Shift+P',
           mac: 'Command+Shift+P',
         },
-        description: 'タブ検索オーバーレイを表示',
+        description: '__MSG_commandSearchTabs__',
       },
     },
   },
