@@ -2,7 +2,7 @@
 
 ## フェーズ 1: 基盤
 
-- [ ] 1. 共有UIパッケージ（@browser-extensions/ui）の作成
+- [x] 1. 共有UIパッケージ（@browser-extensions/ui）の作成
   - ファイル: `packages/ui/package.json`, `packages/ui/src/theme.ts`, `packages/ui/src/index.ts`
   - MUIとEmotionの依存関係を追加し、Material Design 3テーマを定義
   - ThemeProviderラッパーをエクスポート
@@ -10,7 +10,7 @@
   - _要件: 非機能要件（コードアーキテクチャ）_
   - _Prompt: Implement the task for spec tab-switcher, first run spec-workflow-guide to get the workflow guide then implement the task: Role: Reactフロントエンドエンジニア | Task: `packages/ui/` に MUI + Emotion ベースの共有UIパッケージを作成。Material Design 3のダークテーマを定義し、ThemeProviderラッパーをエクスポートする。`packages/shared` の `package.json` 構成を参考にする | Restrictions: MUIの最小限の依存のみ追加。テーマ定義とエクスポートのみ、個別コンポーネントはまだ作らない | Success: pnpm install が通り、他パッケージから import できる。テーマにダークモードのカラーパレットが定義されている_
 
-- [ ] 2. メッセージ型の定義
+- [x] 2. メッセージ型の定義
   - ファイル: `extensions/tab-switcher/src/types/messages.ts`
   - TabInfo, BackgroundMessage, ContentMessage, HighlightRange の型を定義
   - _要件: 要件1〜6, 非機能要件（明確なインターフェース）_
