@@ -14,6 +14,8 @@
   },
   "dependencies": {
     "@browser-extensions/shared": "workspace:*",
+    "@browser-extensions/ui": "workspace:*",
+    "@mui/icons-material": "~9.0.0",
     "react": "~19.2.5",
     "react-dom": "~19.2.5"
   },

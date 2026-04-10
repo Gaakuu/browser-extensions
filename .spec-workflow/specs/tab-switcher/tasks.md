@@ -82,7 +82,7 @@
   - _要件: 要件6_
   - _Prompt: Implement the task for spec tab-switcher, first run spec-workflow-guide to get the workflow guide then implement the task: Role: TypeScriptエンジニア（TDD） | Task: まず fuzzyMatch のテストを書く（"gml" → "Gmail" マッチ、ハイライト範囲、不一致、空文字、特殊文字）。次にテストをパスする実装を書く | Restrictions: テストファースト。外部ライブラリ不使用。パフォーマンス意識 | Success: テストが全てグリーン。50件のタブに対してリアルタイムで動作する速度_
 
-- [ ] 11. TabCard コンポーネントの Story（play関数テスト付き）と実装
+- [x] 11. TabCard コンポーネントの Story（play関数テスト付き）と実装
   - ファイル: `extensions/tab-switcher/src/components/TabCard.stories.tsx`, `extensions/tab-switcher/src/components/TabCard.tsx`
   - Story の play 関数にインタラクションテストを書く → コンポーネントを実装
   - Story バリアント: Default, Focused, WithHighlight, CloseButton
