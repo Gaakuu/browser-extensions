@@ -18,7 +18,7 @@ interface TabSwitcherProps {
 }
 
 export function TabSwitcher({ tabs, onSwitch, onClose, onDismiss, onReady }: TabSwitcherProps) {
-  const [focusIndex, setFocusIndex] = useState(0);
+  const [focusIndex, setFocusIndex] = useState(tabs.length > 1 ? 1 : 0);
 
   const moveDown = useCallback(() => {
     setFocusIndex((prev) => (prev + 1) % tabs.length);

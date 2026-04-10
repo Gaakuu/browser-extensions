@@ -18,6 +18,7 @@ export class OverlayManager {
   private state: OverlayState | null = null;
   private switcherHandle: TabSwitcherHandle | null = null;
   private pendingActions: Array<() => void> = [];
+  private renderKey = 0;
   private onSwitch: (tabId: number) => void;
   private onClose: (tabId: number) => void;
   private onDismiss: () => void;
@@ -35,6 +36,7 @@ export class OverlayManager {
   show(mode: 'switcher' | 'search', tabs: TabInfo[]): void {
     this.state = { mode, tabs };
     this.switcherHandle = null;
+    this.renderKey++;
 
     if (!this.host) {
       this.createHost();
@@ -182,6 +184,7 @@ export class OverlayManager {
           <CssBaseline />
           {mode === 'switcher' ? (
             <TabSwitcher
+              key={this.renderKey}
               tabs={tabs}
               onSwitch={this.onSwitch}
               onClose={this.onClose}
