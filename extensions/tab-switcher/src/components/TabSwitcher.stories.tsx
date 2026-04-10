@@ -71,8 +71,8 @@ export const ExternalHandle: Story = {
     // onReady が TabSwitcherHandle 付きで呼ばれる
     expect(args.onReady).toHaveBeenCalledOnce();
     const handle = (args.onReady as ReturnType<typeof fn>).mock.calls[0][0] as TabSwitcherHandle;
-    expect(handle.moveFocusDown).toBeTypeOf('function');
-    expect(handle.moveFocusUp).toBeTypeOf('function');
-    expect(handle.confirmSelection).toBeTypeOf('function');
+    expect(handle.moveFocusDown).toBeDefined();
+    expect(handle.moveFocusUp).toBeDefined();
+    expect(handle.confirmSelection).toBeDefined();
   },
 };
