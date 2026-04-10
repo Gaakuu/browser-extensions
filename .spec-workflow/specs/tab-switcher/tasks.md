@@ -106,7 +106,7 @@
   - _要件: 要件6_
   - _Prompt: Implement the task for spec tab-switcher, first run spec-workflow-guide to get the workflow guide then implement the task: Role: Reactフロントエンドエンジニア（TDD） | Task: まずSearchOverlayのStoryを作成し、play関数にテストを書く（テキスト入力→絞り込み、ハイライト確認、0件メッセージ、↑↓Enter Escape操作）。バリアントは Default, Searching, NoResults。次にMUI TextField+Listで実装 | Restrictions: テストは play 関数内に書く。@storybook/test を使用。フィルタリングはuseMemo。TextFieldは自動フォーカス | Success: Vitest で Story のテストが全てパス。リアルタイム絞り込みが動作_
 
-- [ ] 14. OverlayManager の実装
+- [x] 14. OverlayManager の実装
   - ファイル: `extensions/tab-switcher/src/content/OverlayManager.ts`
   - Shadow DOM を生成し、React + MUI をマウント
   - Emotion の CacheProvider で Shadow DOM 対応
