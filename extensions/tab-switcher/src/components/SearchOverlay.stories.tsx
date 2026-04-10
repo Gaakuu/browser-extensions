@@ -39,9 +39,9 @@ export const Searching: Story = {
     const canvas = within(canvasElement);
     const input = canvas.getByTestId('search-input');
     await userEvent.type(input, 'git');
-    // GitHubだけが表示される
-    expect(canvas.getByText('GitHub - Pull Requests')).toBeInTheDocument();
-    expect(canvas.queryByText('Gmail - Inbox')).not.toBeInTheDocument();
+    // GitHubだけが表示される（ハイライトで<mark>タグに分割されるのでtestIdで確認）
+    expect(canvas.getByTestId('tab-card-2')).toBeInTheDocument();
+    expect(canvas.queryByTestId('tab-card-1')).not.toBeInTheDocument();
   },
 };
 

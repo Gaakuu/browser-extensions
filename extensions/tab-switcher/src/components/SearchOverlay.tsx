@@ -104,7 +104,7 @@ export function SearchOverlay({ tabs, onSwitch, onClose, onDismiss }: SearchOver
         size="small"
         fullWidth
         sx={{ p: 1 }}
-        inputProps={{ 'data-testid': 'search-input' }}
+        slotProps={{ htmlInput: { 'data-testid': 'search-input' } }}
       />
       <List dense disablePadding sx={{ overflow: 'auto', flex: 1 }}>
         {results.length > 0 ? (
