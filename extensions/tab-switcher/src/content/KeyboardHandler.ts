@@ -31,8 +31,8 @@ export class KeyboardHandler {
       }
     };
 
-    window.addEventListener('keydown', this.handleKeyDown);
-    window.addEventListener('keyup', this.handleKeyUp);
+    window.addEventListener('keydown', this.handleKeyDown, true);
+    window.addEventListener('keyup', this.handleKeyUp, true);
   }
 
   onModifierRelease(callback: () => void): void {
@@ -40,8 +40,8 @@ export class KeyboardHandler {
   }
 
   destroy(): void {
-    window.removeEventListener('keydown', this.handleKeyDown);
-    window.removeEventListener('keyup', this.handleKeyUp);
+    window.removeEventListener('keydown', this.handleKeyDown, true);
+    window.removeEventListener('keyup', this.handleKeyUp, true);
     this.callback = null;
     this.modifiersPressed.clear();
   }

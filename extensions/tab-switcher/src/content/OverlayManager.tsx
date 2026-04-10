@@ -115,12 +115,24 @@ export class OverlayManager {
     this.root = createRoot(mountPoint);
     this.emotionCache = emotionCache;
 
-    // 背景クリックで閉じる
+    // 背景クリックで閉じる（Shadow DOM 内のクリックは無視）
     this.host.addEventListener('click', (e) => {
-      if (e.target === this.host) {
+      const actualTarget = e.composedPath()[0];
+      if (actualTarget === this.host) {
         this.onDismiss();
       }
     });
+
+    // オーバーレイ表示中はキーイベントを背景サイトに渡さない
+    // TabSwitcher/SearchOverlay は window でリスンしているので、
+    // document のバブリングフェーズで止める（window のリスナーは先に実行される）
+    const blockEvent = (e: KeyboardEvent) => {
+      if (this.isVisible()) {
+        e.stopPropagation();
+      }
+    };
+    document.addEventListener('keydown', blockEvent);
+    document.addEventListener('keyup', blockEvent);
 
     document.body.appendChild(this.host);
   }

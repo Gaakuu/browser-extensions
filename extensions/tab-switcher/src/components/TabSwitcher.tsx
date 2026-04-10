@@ -50,27 +50,18 @@ export function TabSwitcher({ tabs, onSwitch, onClose, onDismiss, onReady }: Tab
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      switch (e.key) {
-        case 'ArrowDown':
-          e.preventDefault();
-          moveDown();
-          break;
-        case 'ArrowUp':
-          e.preventDefault();
-          moveUp();
-          break;
-        case ' ':
-          e.preventDefault();
-          moveDown();
-          break;
-        case 'Enter':
-          e.preventDefault();
-          confirm();
-          break;
-        case 'Escape':
-          e.preventDefault();
-          onDismiss();
-          break;
+      if (e.key === 'ArrowDown' || e.key === ' ' || (e.ctrlKey && e.key === 'n')) {
+        e.preventDefault();
+        moveDown();
+      } else if (e.key === 'ArrowUp' || (e.ctrlKey && e.key === 'p')) {
+        e.preventDefault();
+        moveUp();
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        confirm();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        onDismiss();
       }
     };
 

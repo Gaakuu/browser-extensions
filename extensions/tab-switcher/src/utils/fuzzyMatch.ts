@@ -45,15 +45,27 @@ export function fuzzySearchTabs(
   const titleFzf = new Fzf(tabs, { selector: (tab) => tab.title });
   const titleResults = titleFzf.find(query);
 
-  // URLで検索
-  const urlFzf = new Fzf(tabs, { selector: (tab) => tab.url });
+  // URLで検索（クエリパラメータを除外）
+  const stripQuery = (url: string) => {
+    try {
+      const u = new URL(url);
+      return u.origin + u.pathname;
+    } catch {
+      return url;
+    }
+  };
+  const urlFzf = new Fzf(tabs, { selector: (tab) => stripQuery(tab.url) });
   const urlResults = urlFzf.find(query);
+
+  // スコア閾値: 散らばったマッチを除外
+  const MIN_SCORE = 20;
 
   // タイトルマッチを優先し、タイトルにマッチしなかったものだけURLマッチを使う
   const matchedIds = new Set<number>();
   const results: FuzzyMatchResult[] = [];
 
   for (const result of titleResults) {
+    if (result.score < MIN_SCORE) continue;
     matchedIds.add(result.item.id);
     results.push({
       tab: result.item,
@@ -64,6 +76,7 @@ export function fuzzySearchTabs(
   }
 
   for (const result of urlResults) {
+    if (result.score < MIN_SCORE) continue;
     if (!matchedIds.has(result.item.id)) {
       matchedIds.add(result.item.id);
       results.push({

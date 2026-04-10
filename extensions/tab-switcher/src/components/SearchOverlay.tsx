@@ -16,9 +16,12 @@ export function SearchOverlay({ tabs, onSwitch, onClose, onDismiss }: SearchOver
   const [focusIndex, setFocusIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // 表示されるたびにリセット
   useEffect(() => {
+    setQuery('');
+    setFocusIndex(0);
     inputRef.current?.focus();
-  }, []);
+  }, [tabs]);
 
   const results = useMemo(() => fuzzySearchTabs(query, tabs), [query, tabs]);
 
@@ -33,29 +36,27 @@ export function SearchOverlay({ tabs, onSwitch, onClose, onDismiss }: SearchOver
   }, [results, focusIndex, onSwitch]);
 
   useEffect(() => {
+    const moveDown = () => setFocusIndex((prev) => (results.length > 0 ? (prev + 1) % results.length : 0));
+    const moveUp = () => setFocusIndex((prev) => (results.length > 0 ? (prev - 1 + results.length) % results.length : 0));
+
     const handleKeyDown = (e: KeyboardEvent) => {
-      switch (e.key) {
-        case 'ArrowDown':
-          e.preventDefault();
-          setFocusIndex((prev) => (results.length > 0 ? (prev + 1) % results.length : 0));
-          break;
-        case 'ArrowUp':
-          e.preventDefault();
-          setFocusIndex((prev) => (results.length > 0 ? (prev - 1 + results.length) % results.length : 0));
-          break;
-        case 'Enter':
-          e.preventDefault();
-          confirm();
-          break;
-        case 'Escape':
-          e.preventDefault();
-          onDismiss();
-          break;
+      if (e.key === 'ArrowDown' || (e.ctrlKey && e.key === 'n')) {
+        e.preventDefault();
+        moveDown();
+      } else if (e.key === 'ArrowUp' || (e.ctrlKey && e.key === 'p')) {
+        e.preventDefault();
+        moveUp();
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        confirm();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        onDismiss();
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown, true);
+    return () => window.removeEventListener('keydown', handleKeyDown, true);
   }, [results.length, confirm, onDismiss]);
 
   return (
