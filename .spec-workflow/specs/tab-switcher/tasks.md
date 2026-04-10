@@ -68,14 +68,14 @@
 
 ## フェーズ 3: Content Script とUI（TDD）
 
-- [ ] 9. KeyboardHandler のテストと実装
+- [x] 9. KeyboardHandler のテストと実装
   - ファイル: `extensions/tab-switcher/src/content/KeyboardHandler.test.ts`, `extensions/tab-switcher/src/content/KeyboardHandler.ts`
   - テストを先に書く → 実装
   - テストケース: 修飾キー押し続け検知、リリース時コールバック発火、destroy でクリーンアップ
   - _要件: 要件3_
   - _Prompt: Implement the task for spec tab-switcher, first run spec-workflow-guide to get the workflow guide then implement the task: Role: フロントエンドエンジニア（TDD） | Task: まずKeyboardHandlerのテストを書く（修飾キー押し続け、リリース検知、destroy）。次にテストをパスする実装を書く | Restrictions: テストファーストで進める。jsdom環境でKeyboardEventをシミュレート | Success: テストが全てグリーン。修飾キーを離した瞬間にコールバックが発火する_
 
-- [ ] 10. fuzzyMatch のテストと実装
+- [-] 10. fuzzyMatch のテストと実装
   - ファイル: `extensions/tab-switcher/src/utils/fuzzyMatch.test.ts`, `extensions/tab-switcher/src/utils/fuzzyMatch.ts`
   - テストを先に書く → 実装
   - テストケース: 基本マッチ、大文字小文字無視、ハイライト範囲、不一致、空文字、特殊文字
