@@ -96,4 +96,40 @@ describe('KeyboardHandler', () => {
 
     expect(callback).not.toHaveBeenCalled();
   });
+
+  describe('assumeModifiersHeld', () => {
+    it('trueの場合、keydownなしでもリリースが検知される', () => {
+      handler.destroy();
+      handler = new KeyboardHandler(true);
+      const callback = vi.fn();
+      handler.onModifierRelease(callback);
+
+      // keydownなしでいきなりkeyup
+      window.dispatchEvent(new KeyboardEvent('keyup', { key: 'Meta' }));
+
+      expect(callback).toHaveBeenCalledOnce();
+    });
+
+    it('trueの場合、Shiftを離しても検知される', () => {
+      handler.destroy();
+      handler = new KeyboardHandler(true);
+      const callback = vi.fn();
+      handler.onModifierRelease(callback);
+
+      window.dispatchEvent(new KeyboardEvent('keyup', { key: 'Shift' }));
+
+      expect(callback).toHaveBeenCalledOnce();
+    });
+
+    it('falseの場合（デフォルト）、keydownなしではリリースが検知されない', () => {
+      handler.destroy();
+      handler = new KeyboardHandler(false);
+      const callback = vi.fn();
+      handler.onModifierRelease(callback);
+
+      window.dispatchEvent(new KeyboardEvent('keyup', { key: 'Meta' }));
+
+      expect(callback).not.toHaveBeenCalled();
+    });
+  });
 });

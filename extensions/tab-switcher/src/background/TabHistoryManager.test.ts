@@ -125,5 +125,20 @@ describe('TabHistoryManager', () => {
 
       expect(afterOrder).toEqual(beforeOrder);
     });
+
+    it('未知のタブIDで呼ばれた場合、新規タブとして追加される', () => {
+      manager.onTabUpdated(
+        99,
+        'New Tab',
+        'https://new.example.com',
+        'https://new.example.com/favicon.ico',
+      );
+      const tabs = manager.getAllTabs();
+      expect(tabs).toHaveLength(4);
+      const newTab = tabs.find((t) => t.id === 99);
+      expect(newTab).toBeDefined();
+      expect(newTab?.title).toBe('New Tab');
+      expect(newTab?.url).toBe('https://new.example.com');
+    });
   });
 });

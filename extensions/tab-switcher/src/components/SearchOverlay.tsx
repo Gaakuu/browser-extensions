@@ -1,7 +1,7 @@
 import { List, Paper, TextField, Typography } from '@mui/material';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { TabInfo } from '../types/messages';
-import { type MatchRange, fuzzyMatch } from '../utils/fuzzyMatch';
+import { fuzzySearchTabs } from '../utils/fuzzyMatch';
 import { TabCard } from './TabCard';
 
 interface SearchOverlayProps {
@@ -9,12 +9,6 @@ interface SearchOverlayProps {
   onSwitch: (tabId: number) => void;
   onClose: (tabId: number) => void;
   onDismiss: () => void;
-}
-
-interface SearchResult {
-  tab: TabInfo;
-  highlights: MatchRange[];
-  highlightField: 'title' | 'url';
 }
 
 export function SearchOverlay({ tabs, onSwitch, onClose, onDismiss }: SearchOverlayProps) {
@@ -26,25 +20,7 @@ export function SearchOverlay({ tabs, onSwitch, onClose, onDismiss }: SearchOver
     inputRef.current?.focus();
   }, []);
 
-  const results: SearchResult[] = useMemo(() => {
-    if (query === '') {
-      return tabs.map((tab) => ({ tab, highlights: [], highlightField: 'title' as const }));
-    }
-
-    const matched: SearchResult[] = [];
-    for (const tab of tabs) {
-      const titleMatch = fuzzyMatch(query, tab.title);
-      if (titleMatch) {
-        matched.push({ tab, highlights: titleMatch, highlightField: 'title' });
-        continue;
-      }
-      const urlMatch = fuzzyMatch(query, tab.url);
-      if (urlMatch) {
-        matched.push({ tab, highlights: urlMatch, highlightField: 'url' });
-      }
-    }
-    return matched;
-  }, [query, tabs]);
+  const results = useMemo(() => fuzzySearchTabs(query, tabs), [query, tabs]);
 
   useEffect(() => {
     setFocusIndex(0);

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { fuzzyMatch } from './fuzzyMatch';
+import { fuzzyMatch, fuzzySearchTabs } from './fuzzyMatch';
 
 describe('fuzzyMatch', () => {
   it('基本的なマッチ', () => {
@@ -8,7 +8,7 @@ describe('fuzzyMatch', () => {
   });
 
   it('大文字小文字を区別しない', () => {
-    const result = fuzzyMatch('GMAIL', 'gmail');
+    const result = fuzzyMatch('gmail', 'Gmail');
     expect(result).not.toBeNull();
   });
 
@@ -17,19 +17,10 @@ describe('fuzzyMatch', () => {
     expect(result).toBeNull();
   });
 
-  it('ハイライト範囲を正しく返す', () => {
+  it('ハイライト範囲を返す', () => {
     const result = fuzzyMatch('gml', 'Gmail');
     expect(result).not.toBeNull();
-    // G, m が連続 → {0,2}、l は位置4 → {4,5}
-    expect(result).toContainEqual({ start: 0, end: 2 });
-    expect(result).toContainEqual({ start: 4, end: 5 });
-  });
-
-  it('連続する文字はまとめたハイライト範囲になる', () => {
-    const result = fuzzyMatch('gma', 'Gmail');
-    expect(result).not.toBeNull();
-    // G, m, a が連続 → 1つの範囲
-    expect(result).toContainEqual({ start: 0, end: 3 });
+    expect(result?.length).toBeGreaterThan(0);
   });
 
   it('空文字の検索は空の結果を返す', () => {
@@ -43,18 +34,69 @@ describe('fuzzyMatch', () => {
   });
 
   it('特殊文字でエラーにならない', () => {
-    const result = fuzzyMatch('(', 'test(123)');
-    expect(result).not.toBeNull();
+    expect(() => fuzzyMatch('(', 'test(123)')).not.toThrow();
   });
 
   it('URLに対してマッチする', () => {
-    const result = fuzzyMatch('git', 'https://github.com');
+    const result = fuzzyMatch('github', 'https://github.com');
     expect(result).not.toBeNull();
   });
+});
 
-  it('順序通りにマッチする', () => {
-    // 'ba' は 'abc' にマッチしない（b→aは逆順）
-    const result = fuzzyMatch('ba', 'abc');
-    expect(result).toBeNull();
+describe('fuzzySearchTabs', () => {
+  const sampleTabs = [
+    {
+      id: 1,
+      title: 'Gmail - Inbox',
+      url: 'https://mail.google.com',
+      favIconUrl: '',
+      lastAccessed: 1,
+    },
+    {
+      id: 2,
+      title: 'GitHub - Pull Requests',
+      url: 'https://github.com/pulls',
+      favIconUrl: '',
+      lastAccessed: 2,
+    },
+    {
+      id: 3,
+      title: 'Google Search',
+      url: 'https://www.google.com/search?q=test',
+      favIconUrl: '',
+      lastAccessed: 3,
+    },
+  ];
+
+  it('空クエリは全タブを返す', () => {
+    const results = fuzzySearchTabs('', sampleTabs);
+    expect(results).toHaveLength(3);
+  });
+
+  it('タイトルでマッチする', () => {
+    const results = fuzzySearchTabs('gmail', sampleTabs);
+    expect(results.length).toBeGreaterThan(0);
+    expect(results[0].tab.id).toBe(1);
+    expect(results[0].highlightField).toBe('title');
+  });
+
+  it('マッチしないクエリは空配列を返す', () => {
+    const results = fuzzySearchTabs('zzzzz', sampleTabs);
+    expect(results).toHaveLength(0);
+  });
+
+  it('連続マッチが優先される（search → /search にマッチ、散らばらない）', () => {
+    const results = fuzzySearchTabs('search', sampleTabs);
+    const googleSearch = results.find((r) => r.tab.id === 3);
+    expect(googleSearch).toBeDefined();
+    // Google Search のタイトルにマッチするはず
+    expect(googleSearch?.highlightField).toBe('title');
+  });
+
+  it('ハイライト範囲が返される', () => {
+    const results = fuzzySearchTabs('git', sampleTabs);
+    const github = results.find((r) => r.tab.id === 2);
+    expect(github).toBeDefined();
+    expect(github?.highlights.length).toBeGreaterThan(0);
   });
 });

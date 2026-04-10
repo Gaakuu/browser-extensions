@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, within } from 'storybook/test';
-import { TabSwitcher } from './TabSwitcher';
+import { TabSwitcher, type TabSwitcherHandle } from './TabSwitcher';
 
 const createTabs = (count: number) =>
   Array.from({ length: count }, (_, i) => ({
@@ -60,5 +60,19 @@ export const SingleTab: Story = {
 export const ManyTabs: Story = {
   args: {
     tabs: createTabs(20),
+  },
+};
+
+export const ExternalHandle: Story = {
+  args: {
+    onReady: fn(),
+  },
+  play: async ({ args }) => {
+    // onReady が TabSwitcherHandle 付きで呼ばれる
+    expect(args.onReady).toHaveBeenCalledOnce();
+    const handle = (args.onReady as ReturnType<typeof fn>).mock.calls[0][0] as TabSwitcherHandle;
+    expect(handle.moveFocusDown).toBeTypeOf('function');
+    expect(handle.moveFocusUp).toBeTypeOf('function');
+    expect(handle.confirmSelection).toBeTypeOf('function');
   },
 };
