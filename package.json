@@ -7,15 +7,20 @@
     "zip": "turbo zip",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
-    "format": "biome format --write ."
+    "format": "biome format --write .",
+    "test": "turbo test"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.4.10",
+    "@biomejs/biome": "~2.4.10",
+    "@testing-library/jest-dom": "~6.9.1",
+    "@testing-library/react": "~16.3.2",
     "@types/react": "~19.2.14",
     "@types/react-dom": "~19.2.3",
     "chrome-types": "~0.1.425",
+    "jsdom": "~29.0.2",
     "turbo": "~2.9.5",
-    "typescript": "~6.0.2"
+    "typescript": "~6.0.2",
+    "vitest": "~4.1.4"
   },
   "packageManager": "pnpm@10.8.0"
 }

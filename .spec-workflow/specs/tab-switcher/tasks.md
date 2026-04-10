@@ -22,14 +22,14 @@
   - _要件: 要件1, 要件6_
   - _Prompt: Implement the task for spec tab-switcher, first run spec-workflow-guide to get the workflow guide then implement the task: Role: Chrome拡張機能エンジニア | Task: wxt.config.ts に Commands API のショートカット2つ（show-tab-switcher: Cmd+Shift+Space、search-tabs: Cmd+Shift+P）を登録 | Restrictions: 既存の設定を壊さない。permissions に tabs を追加 | Success: wxt build が通り、manifest.json に commands が正しく出力される_
 
-- [-] 4. テスト基盤のセットアップ
+- [x] 4. テスト基盤のセットアップ
   - ファイル: `extensions/tab-switcher/vitest.config.ts`, `packages/ui/vitest.config.ts`
   - Vitest + @testing-library/react + jsdom のセットアップ
   - モノレポルートに共通の vitest 設定があれば共有
   - _要件: 非機能要件_
   - _Prompt: Implement the task for spec tab-switcher, first run spec-workflow-guide to get the workflow guide then implement the task: Role: テストエンジニア | Task: Vitest + @testing-library/react + jsdom をセットアップ。tab-switcher と packages/ui それぞれに vitest.config.ts を作成。package.json に test スクリプトを追加 | Restrictions: 既存のビルド設定を壊さない | Success: `pnpm test` で空のテストスイートが正常に実行される_
 
-- [ ] 5. Storybook のセットアップ
+- [-] 5. Storybook のセットアップ
   - ファイル: `extensions/tab-switcher/.storybook/main.ts`, `extensions/tab-switcher/.storybook/preview.ts`
   - Storybook + React + MUI テーマの設定
   - @browser-extensions/ui のテーマを Storybook の decorator で適用

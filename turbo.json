@@ -12,6 +12,9 @@
     "zip": {
       "dependsOn": ["build"],
       "outputs": [".output/**/*.zip"]
+    },
+    "test": {
+      "cache": false
     }
   }
 }
