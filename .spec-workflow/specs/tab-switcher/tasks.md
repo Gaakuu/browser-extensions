@@ -114,7 +114,7 @@
   - _要件: 要件1_
   - _Prompt: Implement the task for spec tab-switcher, first run spec-workflow-guide to get the workflow guide then implement the task: Role: Reactフロントエンドエンジニア | Task: Shadow DOM を作成し、その中にReact + MUI（Emotion CacheProvider付き）をマウントするOverlayManagerクラスを実装。@browser-extensions/ui のテーマを使用 | Restrictions: ページのスタイルに干渉しない。Shadow DOM の外にDOMを追加しない | Success: show() でオーバーレイが表示され、hide() で消える。ページのCSSの影響を受けない_
 
-- [ ] 15. Content Script エントリポイントの実装
+- [x] 15. Content Script エントリポイントの実装
   - ファイル: `extensions/tab-switcher/src/entrypoints/content.ts`
   - OverlayManager を初期化
   - Background からのメッセージ（SHOW_SWITCHER, SHOW_SEARCH, TAB_CLOSED）をリスン
