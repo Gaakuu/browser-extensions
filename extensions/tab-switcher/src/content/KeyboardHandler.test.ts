@@ -18,7 +18,9 @@ describe('KeyboardHandler', () => {
 
     // Cmd+Shift を押す
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Meta', metaKey: true }));
-    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Shift', shiftKey: true, metaKey: true }));
+    window.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Shift', shiftKey: true, metaKey: true }),
+    );
 
     expect(callback).not.toHaveBeenCalled();
 
@@ -33,7 +35,9 @@ describe('KeyboardHandler', () => {
     handler.onModifierRelease(callback);
 
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Meta', metaKey: true }));
-    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Shift', shiftKey: true, metaKey: true }));
+    window.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Shift', shiftKey: true, metaKey: true }),
+    );
     // Space を押して離す（修飾キーは押し続け）
     window.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', metaKey: true, shiftKey: true }));
     window.dispatchEvent(new KeyboardEvent('keyup', { key: ' ', metaKey: true, shiftKey: true }));
@@ -46,7 +50,9 @@ describe('KeyboardHandler', () => {
     handler.onModifierRelease(callback);
 
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Meta', metaKey: true }));
-    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Shift', shiftKey: true, metaKey: true }));
+    window.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Shift', shiftKey: true, metaKey: true }),
+    );
 
     // Shift を離す
     window.dispatchEvent(new KeyboardEvent('keyup', { key: 'Shift' }));
@@ -59,7 +65,9 @@ describe('KeyboardHandler', () => {
     handler.onModifierRelease(callback);
 
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Control', ctrlKey: true }));
-    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Shift', shiftKey: true, ctrlKey: true }));
+    window.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Shift', shiftKey: true, ctrlKey: true }),
+    );
 
     window.dispatchEvent(new KeyboardEvent('keyup', { key: 'Control' }));
 
@@ -72,7 +80,9 @@ describe('KeyboardHandler', () => {
     handler.destroy();
 
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Meta', metaKey: true }));
-    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Shift', shiftKey: true, metaKey: true }));
+    window.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Shift', shiftKey: true, metaKey: true }),
+    );
     window.dispatchEvent(new KeyboardEvent('keyup', { key: 'Meta' }));
 
     expect(callback).not.toHaveBeenCalled();

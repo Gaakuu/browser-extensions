@@ -15,7 +15,8 @@ export class KeyboardHandler {
 
     this.handleKeyUp = (e: KeyboardEvent) => {
       if (MODIFIER_KEYS.has(e.key) && this.modifiersPressed.size > 0) {
-        const wasModifierHeld = this.modifiersPressed.has('Meta') || this.modifiersPressed.has('Control');
+        const wasModifierHeld =
+          this.modifiersPressed.has('Meta') || this.modifiersPressed.has('Control');
         this.modifiersPressed.delete(e.key);
 
         if (wasModifierHeld && this.callback) {

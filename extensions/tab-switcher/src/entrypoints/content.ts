@@ -1,5 +1,5 @@
-import { OverlayManager } from '../content/OverlayManager';
 import { KeyboardHandler } from '../content/KeyboardHandler';
+import { OverlayManager } from '../content/OverlayManager';
 import type { BackgroundMessage } from '../types/messages';
 
 export default defineContentScript({

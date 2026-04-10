@@ -28,7 +28,7 @@ export default defineBackground(() => {
     const sendToContentScript = async (type: 'SHOW_SWITCHER' | 'SHOW_SEARCH') => {
       const tabs = type === 'SHOW_SWITCHER' ? manager.getRecentTabs() : manager.getAllTabs();
       try {
-        await chrome.tabs.sendMessage(activeTab.id!, { type, tabs });
+        await chrome.tabs.sendMessage(activeTab.id as number, { type, tabs });
       } catch {
         // Content Script が動作しないページ（chrome:// 等）
         // フォールバック: 直前のタブに切り替え

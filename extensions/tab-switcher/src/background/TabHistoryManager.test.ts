@@ -3,8 +3,18 @@ import { TabHistoryManager } from './TabHistoryManager';
 
 // chrome.tabs API のモック
 const mockTabs = [
-  { id: 1, title: 'Gmail', url: 'https://mail.google.com', favIconUrl: 'https://mail.google.com/favicon.ico' },
-  { id: 2, title: 'GitHub', url: 'https://github.com', favIconUrl: 'https://github.com/favicon.ico' },
+  {
+    id: 1,
+    title: 'Gmail',
+    url: 'https://mail.google.com',
+    favIconUrl: 'https://mail.google.com/favicon.ico',
+  },
+  {
+    id: 2,
+    title: 'GitHub',
+    url: 'https://github.com',
+    favIconUrl: 'https://github.com/favicon.ico',
+  },
   { id: 3, title: 'Slack', url: 'https://slack.com', favIconUrl: 'https://slack.com/favicon.ico' },
 ];
 
@@ -19,12 +29,9 @@ vi.stubGlobal('chrome', {
 
 describe('TabHistoryManager', () => {
   let manager: TabHistoryManager;
-  let now: number;
-
   beforeEach(async () => {
     vi.clearAllMocks();
     vi.useFakeTimers();
-    now = Date.now();
     manager = new TabHistoryManager();
     await manager.init();
   });
@@ -46,7 +53,7 @@ describe('TabHistoryManager', () => {
       vi.advanceTimersByTime(100);
       manager.onTabActivated(1);
       const after = manager.getAllTabs().find((t) => t.id === 1)?.lastAccessed;
-      expect(after).toBeGreaterThan(before!);
+      expect(after).toBeGreaterThan(before ?? 0);
     });
   });
 
@@ -95,7 +102,12 @@ describe('TabHistoryManager', () => {
 
   describe('onTabUpdated', () => {
     it('メタデータが更新される', () => {
-      manager.onTabUpdated(1, 'Gmail - Inbox (3)', 'https://mail.google.com/inbox', 'https://mail.google.com/favicon.ico');
+      manager.onTabUpdated(
+        1,
+        'Gmail - Inbox (3)',
+        'https://mail.google.com/inbox',
+        'https://mail.google.com/favicon.ico',
+      );
       const tab = manager.getAllTabs().find((t) => t.id === 1);
       expect(tab?.title).toBe('Gmail - Inbox (3)');
       expect(tab?.url).toBe('https://mail.google.com/inbox');
