@@ -90,7 +90,7 @@
   - _要件: 要件2, 要件5, 要件6_
   - _Prompt: Implement the task for spec tab-switcher, first run spec-workflow-guide to get the workflow guide then implement the task: Role: Reactコンポーネントエンジニア（TDD） | Task: まずTabCardのStoryを作成し、play関数にインタラクションテストを書く（表示確認、バツボタンクリック、フォーカス状態）。バリアントは Default, Focused, WithHighlight, CloseButton の4つ。次にMUIコンポーネントで実装してテストをパスさせる | Restrictions: テストは play 関数内に書く（別途 .test.tsx は不要）。@storybook/test の expect, userEvent, fn を使用。MUIコンポーネント使用。@browser-extensions/ui テーマに従う | Success: Vitest で Story のテストが全てパス。Storybook で4バリアントが確認できる_
 
-- [ ] 12. TabSwitcher コンポーネントの Story（play関数テスト付き）と実装
+- [x] 12. TabSwitcher コンポーネントの Story（play関数テスト付き）と実装
   - ファイル: `extensions/tab-switcher/src/components/TabSwitcher.stories.tsx`, `extensions/tab-switcher/src/components/TabSwitcher.tsx`
   - Story の play 関数にインタラクションテストを書く → コンポーネントを実装
   - Story バリアント: Default, SingleTab, ManyTabs
