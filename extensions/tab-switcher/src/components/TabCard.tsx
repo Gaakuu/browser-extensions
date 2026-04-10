@@ -45,7 +45,7 @@ export function TabCard({ tab, isFocused, onSelect, onClose, highlights, highlig
     <ListItemButton
       selected={isFocused}
       onClick={onSelect}
-      sx={{ borderRadius: 1, py: 0.5 }}
+      sx={{ py: 0.5 }}
       data-testid={`tab-card-${tab.id}`}
     >
       <ListItemAvatar sx={{ minWidth: 36 }}>

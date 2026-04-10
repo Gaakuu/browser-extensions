@@ -80,10 +80,10 @@ export function SearchOverlay({ tabs, onSwitch, onClose, onDismiss }: SearchOver
         variant="outlined"
         size="small"
         fullWidth
-        sx={{ p: 1 }}
+        sx={{ px: 2, py: 1.5 }}
         slotProps={{ htmlInput: { 'data-testid': 'search-input' } }}
       />
-      <List dense disablePadding sx={{ overflow: 'auto', flex: 1 }}>
+      <List dense sx={{ overflow: 'auto', flex: 1, py: 0.5 }}>
         {results.length > 0 ? (
           results.map((result, index) => (
             <TabCard

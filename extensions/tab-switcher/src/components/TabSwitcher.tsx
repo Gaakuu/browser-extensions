@@ -96,7 +96,7 @@ export function TabSwitcher({ tabs, onSwitch, onClose, onDismiss, onReady }: Tab
       }}
       data-testid="tab-switcher"
     >
-      <List dense disablePadding>
+      <List dense sx={{ py: 0.5 }}>
         {tabs.map((tab, index) => (
           <TabCard
             key={tab.id}

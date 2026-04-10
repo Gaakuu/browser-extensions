@@ -100,16 +100,34 @@ export class OverlayManager {
       align-items: center;
       background: rgba(0, 0, 0, 0.5);
       z-index: 2147483647;
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      line-height: normal;
     `;
 
     this.shadowRoot = this.host.attachShadow({ mode: 'open' });
 
+    // Shadow DOM 内の CSS リセット（box-sizing のみ、MUI のスタイルを壊さない）
+    const resetStyle = document.createElement('style');
+    resetStyle.textContent = `
+      *, *::before, *::after {
+        box-sizing: border-box;
+      }
+    `;
+    this.shadowRoot.appendChild(resetStyle);
+
+    // Emotion のスタイルを注入するコンテナ
+    const styleContainer = document.createElement('div');
+    this.shadowRoot.appendChild(styleContainer);
+
+    // React のマウントポイント
     const mountPoint = document.createElement('div');
     this.shadowRoot.appendChild(mountPoint);
 
     const emotionCache = createCache({
       key: 'tab-switcher',
-      container: this.shadowRoot,
+      container: styleContainer,
     });
 
     this.root = createRoot(mountPoint);
