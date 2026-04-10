@@ -1,6 +1,6 @@
-import { createTheme } from '@mui/material/styles';
+import { createTheme, type ThemeOptions } from '@mui/material/styles';
 
-export const darkTheme = createTheme({
+export const darkThemeOptions: ThemeOptions = {
   palette: {
     mode: 'dark',
     primary: {
@@ -25,7 +25,9 @@ export const darkTheme = createTheme({
     fontFamily: '"Google Sans", "Roboto", "Arial", sans-serif',
     fontSize: 13,
   },
-});
+};
+
+export const darkTheme = createTheme(darkThemeOptions);
 
 export const lightTheme = createTheme({
   palette: {

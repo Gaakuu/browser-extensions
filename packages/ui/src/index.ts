@@ -1,3 +1,4 @@
 export { CssBaseline } from '@mui/material';
-export { ThemeProvider } from '@mui/material/styles';
-export { darkTheme, lightTheme } from './theme';
+export type { ThemeOptions } from '@mui/material/styles';
+export { createTheme, ThemeProvider } from '@mui/material/styles';
+export { darkTheme, darkThemeOptions, lightTheme } from './theme';

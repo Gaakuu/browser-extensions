@@ -16,6 +16,7 @@ export function SearchOverlay({ tabs, onSwitch, onClose, onDismiss }: SearchOver
   const [query, setQuery] = useState('');
   const [focusIndex, setFocusIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
 
   // 表示されるたびにリセット
   useEffect(() => {
@@ -29,6 +30,14 @@ export function SearchOverlay({ tabs, onSwitch, onClose, onDismiss }: SearchOver
   useEffect(() => {
     setFocusIndex(0);
   }, [query]);
+
+  // フォーカスされたアイテムが見切れたら自動スクロール
+  useEffect(() => {
+    const listEl = listRef.current;
+    if (!listEl) return;
+    const focusedItem = listEl.children[focusIndex] as HTMLElement | undefined;
+    focusedItem?.scrollIntoView({ block: 'nearest' });
+  }, [focusIndex]);
 
   const confirm = useCallback(() => {
     if (results[focusIndex]) {
@@ -85,7 +94,7 @@ export function SearchOverlay({ tabs, onSwitch, onClose, onDismiss }: SearchOver
         sx={{ px: 2, py: 1.5 }}
         slotProps={{ htmlInput: { 'data-testid': 'search-input' } }}
       />
-      <List dense sx={{ overflow: 'auto', flex: 1, py: 0.5 }}>
+      <List ref={listRef} dense sx={{ overflow: 'auto', flex: 1, py: 0.5 }}>
         {results.length > 0 ? (
           results.map((result, index) => (
             <TabCard
