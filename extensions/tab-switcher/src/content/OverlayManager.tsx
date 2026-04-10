@@ -124,15 +124,24 @@ export class OverlayManager {
     });
 
     // オーバーレイ表示中はキーイベントを背景サイトに渡さない
-    // TabSwitcher/SearchOverlay は window でリスンしているので、
-    // document のバブリングフェーズで止める（window のリスナーは先に実行される）
-    const blockEvent = (e: KeyboardEvent) => {
+    const blockKeyEvent = (e: KeyboardEvent) => {
       if (this.isVisible()) {
         e.stopPropagation();
       }
     };
-    document.addEventListener('keydown', blockEvent);
-    document.addEventListener('keyup', blockEvent);
+    document.addEventListener('keydown', blockKeyEvent);
+    document.addEventListener('keyup', blockKeyEvent);
+
+    // オーバーレイ表示中は背景のスクロールを防止
+    document.addEventListener(
+      'wheel',
+      (e) => {
+        if (this.isVisible() && !this.shadowRoot?.contains(e.target as Node)) {
+          e.preventDefault();
+        }
+      },
+      { passive: false },
+    );
 
     document.body.appendChild(this.host);
   }
