@@ -57,7 +57,7 @@
   - _要件: 要件2, 要件3_
   - _Prompt: Implement the task for spec tab-switcher, first run spec-workflow-guide to get the workflow guide then implement the task: Role: Chrome拡張機能バックエンドエンジニア（TDD） | Task: タスク6で書いたテストを全てパスするようにTabHistoryManagerを実装。`Map<tabId, TabInfo>` でインメモリ管理、lastAccessedでMRUソート | Restrictions: テストを変更しない。テストが全てグリーンになるまで実装する | Success: `pnpm test` で TabHistoryManager のテストが全てパスする_
 
-- [ ] 8. Background エントリポイントの実装
+- [x] 8. Background エントリポイントの実装
   - ファイル: `extensions/tab-switcher/src/entrypoints/background.ts`
   - TabHistoryManager を初期化
   - chrome.commands.onCommand でショートカットを受信し、Content Script にメッセージ送信
