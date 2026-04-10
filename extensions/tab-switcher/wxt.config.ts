@@ -5,15 +5,22 @@ export default defineConfig({
   modules: ['@wxt-dev/module-react'],
   manifest: {
     name: 'Tab Switcher',
-    description: 'Arc-style tab switcher with MRU ordering and screenshot previews',
-    permissions: ['tabs', 'activeTab', 'storage'],
+    description: 'VSCode風のMRU順タブスイッチャー',
+    permissions: ['tabs'],
     commands: {
       'show-tab-switcher': {
         suggested_key: {
           default: 'Ctrl+Shift+Space',
           mac: 'Command+Shift+Space',
         },
-        description: 'Show tab switcher overlay',
+        description: 'タブ切り替えオーバーレイを表示',
+      },
+      'search-tabs': {
+        suggested_key: {
+          default: 'Ctrl+Shift+P',
+          mac: 'Command+Shift+P',
+        },
+        description: 'タブ検索オーバーレイを表示',
       },
     },
   },

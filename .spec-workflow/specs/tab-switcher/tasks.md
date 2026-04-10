@@ -16,13 +16,13 @@
   - _要件: 要件1〜6, 非機能要件（明確なインターフェース）_
   - _Prompt: Implement the task for spec tab-switcher, first run spec-workflow-guide to get the workflow guide then implement the task: Role: TypeScriptエンジニア | Task: Background ↔ Content Script 間のメッセージ型を定義。TabInfo, BackgroundMessage, ContentMessage, HighlightRange インターフェースを設計書のデータモデルに従って作成 | Restrictions: 型定義のみ、実装コードは含めない | Success: tsc --noEmit が通る。全てのメッセージパターンが型でカバーされている_
 
-- [ ] 3. wxt.config.ts にコマンドとContent Script設定を追加
+- [x] 3. wxt.config.ts にコマンドとContent Script設定を追加
   - ファイル: `extensions/tab-switcher/wxt.config.ts`
   - show-tab-switcher と search-tabs の2つのコマンドを登録
   - _要件: 要件1, 要件6_
   - _Prompt: Implement the task for spec tab-switcher, first run spec-workflow-guide to get the workflow guide then implement the task: Role: Chrome拡張機能エンジニア | Task: wxt.config.ts に Commands API のショートカット2つ（show-tab-switcher: Cmd+Shift+Space、search-tabs: Cmd+Shift+P）を登録 | Restrictions: 既存の設定を壊さない。permissions に tabs を追加 | Success: wxt build が通り、manifest.json に commands が正しく出力される_
 
-- [ ] 4. テスト基盤のセットアップ
+- [-] 4. テスト基盤のセットアップ
   - ファイル: `extensions/tab-switcher/vitest.config.ts`, `packages/ui/vitest.config.ts`
   - Vitest + @testing-library/react + jsdom のセットアップ
   - モノレポルートに共通の vitest 設定があれば共有
