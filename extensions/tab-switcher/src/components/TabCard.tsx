@@ -52,13 +52,20 @@ export function TabCard({ tab, isFocused, onSelect, onClose, highlights, highlig
         <Avatar src={tab.favIconUrl} sx={{ width: 20, height: 20 }} alt="" />
       </ListItemAvatar>
       <ListItemText
+        sx={{ overflow: 'hidden', mr: 1 }}
         primary={
           <Typography variant="body2" noWrap>
             {highlightText(tab.title, titleHighlights)}
           </Typography>
         }
         secondary={
-          <Typography variant="caption" color="text.secondary" noWrap>
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            noWrap
+            component="div"
+            sx={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis' }}
+          >
             {highlightText(tab.url, urlHighlights)}
           </Typography>
         }
