@@ -11,14 +11,11 @@
   },
   "dependencies": {
     "@browser-extensions/shared": "workspace:*",
-    "react": "^19",
-    "react-dom": "^19"
+    "react": "~19.2.5",
+    "react-dom": "~19.2.5"
   },
   "devDependencies": {
     "@wxt-dev/module-react": "~1.1.5",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "wxt": "^0.19",
-    "typescript": "^5"
+    "wxt": "~0.19.29"
   }
 }

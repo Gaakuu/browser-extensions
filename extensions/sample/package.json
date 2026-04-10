@@ -12,7 +12,6 @@
     "@browser-extensions/shared": "workspace:*"
   },
   "devDependencies": {
-    "typescript": "^5",
-    "wxt": "^0.19"
+    "wxt": "~0.19.29"
   }
 }

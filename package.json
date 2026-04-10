@@ -11,8 +11,11 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.10",
-    "chrome-types": "^0.1.425",
-    "turbo": "^2"
+    "@types/react": "~19.2.14",
+    "@types/react-dom": "~19.2.3",
+    "chrome-types": "~0.1.425",
+    "turbo": "~2.9.5",
+    "typescript": "~6.0.2"
   },
   "packageManager": "pnpm@10.8.0"
 }
