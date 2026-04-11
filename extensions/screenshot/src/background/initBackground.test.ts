@@ -5,7 +5,6 @@ const mockCaptureVisibleArea = vi.fn();
 const mockCaptureFullPage = vi.fn();
 const mockCropImage = vi.fn();
 const mockSaveAsFile = vi.fn();
-const mockCopyToClipboard = vi.fn();
 
 vi.mock('./CaptureService', () => ({
   CaptureService: class {
@@ -18,18 +17,14 @@ vi.mock('./CaptureService', () => ({
 vi.mock('./DownloadService', () => ({
   DownloadService: class {
     saveAsFile = mockSaveAsFile;
-    copyToClipboard = mockCopyToClipboard;
   },
 }));
 
-// Chrome API + defineBackground をグローバルに設定
+// Chrome API をグローバルに設定
 let commandListener: (command: string) => void;
 let messageListener: (message: any, sender: any, sendResponse: (response?: any) => void) => boolean | void;
 const mockTabsSendMessage = vi.fn();
 const mockTabsQuery = vi.fn();
-
-// WXT の defineBackground をモック
-(globalThis as any).defineBackground = (cb: () => void) => { cb(); };
 
 (globalThis as any).chrome = {
   commands: {
@@ -48,8 +43,6 @@ const mockTabsQuery = vi.fn();
   },
 };
 
-// background.ts のロジックを直接テスト
-// WXT の defineBackground は export default なので、テスト用に関数を抽出
 import { initBackground } from './initBackground';
 initBackground();
 
@@ -75,10 +68,9 @@ describe('background entrypoint', () => {
   });
 
   describe('chrome.runtime.onMessage', () => {
-    it('CAPTURE_VISIBLE_AREA で captureVisibleArea を呼び、自動コピーして CAPTURE_RESULT を返す', async () => {
+    it('CAPTURE_VISIBLE_AREA で captureVisibleArea を呼び CAPTURE_RESULT を返す', async () => {
       const fakeDataUrl = 'data:image/png;base64,visible';
       mockCaptureVisibleArea.mockResolvedValue(fakeDataUrl);
-      mockCopyToClipboard.mockResolvedValue(undefined);
 
       const sendResponse = vi.fn();
       messageListener(
@@ -92,21 +84,19 @@ describe('background entrypoint', () => {
       });
 
       expect(mockCaptureVisibleArea).toHaveBeenCalled();
-      expect(mockCopyToClipboard).toHaveBeenCalledWith(fakeDataUrl);
       expect(sendResponse).toHaveBeenCalledWith({
         type: 'CAPTURE_RESULT',
         dataUrl: fakeDataUrl,
       });
     });
 
-    it('CAPTURE_ELEMENT で cropImage を呼び、自動コピーして CAPTURE_RESULT を返す', async () => {
+    it('CAPTURE_ELEMENT で cropImage を呼び CAPTURE_RESULT を返す', async () => {
       const rect = { x: 10, y: 20, width: 100, height: 50, devicePixelRatio: 2 };
       const visibleDataUrl = 'data:image/png;base64,visible';
       const croppedDataUrl = 'data:image/png;base64,cropped';
 
       mockCaptureVisibleArea.mockResolvedValue(visibleDataUrl);
       mockCropImage.mockResolvedValue(croppedDataUrl);
-      mockCopyToClipboard.mockResolvedValue(undefined);
 
       const sendResponse = vi.fn();
       messageListener(
@@ -119,19 +109,16 @@ describe('background entrypoint', () => {
         expect(sendResponse).toHaveBeenCalled();
       });
 
-      expect(mockCaptureVisibleArea).toHaveBeenCalled();
       expect(mockCropImage).toHaveBeenCalledWith(visibleDataUrl, rect);
-      expect(mockCopyToClipboard).toHaveBeenCalledWith(croppedDataUrl);
       expect(sendResponse).toHaveBeenCalledWith({
         type: 'CAPTURE_RESULT',
         dataUrl: croppedDataUrl,
       });
     });
 
-    it('CAPTURE_FULL_PAGE で captureFullPage を呼び、自動コピーして CAPTURE_RESULT を返す', async () => {
+    it('CAPTURE_FULL_PAGE で captureFullPage を呼び CAPTURE_RESULT を返す', async () => {
       const fakeDataUrl = 'data:image/png;base64,fullpage';
       mockCaptureFullPage.mockResolvedValue(fakeDataUrl);
-      mockCopyToClipboard.mockResolvedValue(undefined);
 
       const sendResponse = vi.fn();
       messageListener(
@@ -145,7 +132,10 @@ describe('background entrypoint', () => {
       });
 
       expect(mockCaptureFullPage).toHaveBeenCalledWith(1, expect.any(Function));
-      expect(mockCopyToClipboard).toHaveBeenCalledWith(fakeDataUrl);
+      expect(sendResponse).toHaveBeenCalledWith({
+        type: 'CAPTURE_RESULT',
+        dataUrl: fakeDataUrl,
+      });
     });
 
     it('SAVE_FILE で saveAsFile を呼ぶ', async () => {

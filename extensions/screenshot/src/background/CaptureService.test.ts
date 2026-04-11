@@ -4,12 +4,10 @@ import type { CropRect } from '../types/messages';
 // Chrome API モック
 const mockCaptureVisibleTab = vi.fn();
 const mockExecuteScript = vi.fn();
-const mockSendMessage = vi.fn();
 
 vi.stubGlobal('chrome', {
   tabs: {
     captureVisibleTab: mockCaptureVisibleTab,
-    sendMessage: mockSendMessage,
   },
   scripting: {
     executeScript: mockExecuteScript,
@@ -48,12 +46,6 @@ describe('CaptureService', () => {
   });
 
   describe('cropImage', () => {
-    let originalCreateElement: typeof document.createElement;
-
-    beforeEach(() => {
-      originalCreateElement = document.createElement.bind(document);
-    });
-
     afterEach(() => {
       vi.restoreAllMocks();
     });
@@ -69,36 +61,40 @@ describe('CaptureService', () => {
       };
 
       const drawImageSpy = vi.fn();
-      const toDataURLSpy = vi.fn().mockReturnValue('data:image/png;base64,cropped');
+      const mockBitmap = { width: 400, height: 300, close: vi.fn() };
+      const mockBlob = new Blob(['fake'], { type: 'image/png' });
 
-      const mockCanvas = {
-        width: 0,
-        height: 0,
-        getContext: vi.fn().mockReturnValue({
-          drawImage: drawImageSpy,
-        }),
-        toDataURL: toDataURLSpy,
-      };
+      // loadBitmap をモック
+      vi.spyOn(service as any, 'loadBitmap').mockResolvedValue(mockBitmap);
 
-      // loadImage をモック（Image の onload を回避）
-      const mockImg = { width: 400, height: 300 };
-      vi.spyOn(service as any, 'loadImage').mockResolvedValue(mockImg);
-
-      // createElement のモック（再帰回避）
-      vi.spyOn(document, 'createElement').mockImplementation((tag: string) => {
-        if (tag === 'canvas') return mockCanvas as unknown as HTMLCanvasElement;
-        return originalCreateElement(tag);
+      // OffscreenCanvas をモック
+      let createdWidth = 0;
+      let createdHeight = 0;
+      vi.stubGlobal('OffscreenCanvas', class {
+        width: number;
+        height: number;
+        constructor(w: number, h: number) {
+          this.width = w;
+          this.height = h;
+          createdWidth = w;
+          createdHeight = h;
+        }
+        getContext() { return { drawImage: drawImageSpy }; }
+        convertToBlob() { return Promise.resolve(mockBlob); }
       });
+
+      // canvasToDataUrl をモック
+      vi.spyOn(service as any, 'canvasToDataUrl').mockResolvedValue('data:image/png;base64,cropped');
 
       const result = await service.cropImage(sourceDataUrl, rect);
 
-      // Canvas サイズは width * dpr, height * dpr
-      expect(mockCanvas.width).toBe(200); // 100 * 2
-      expect(mockCanvas.height).toBe(100); // 50 * 2
+      // OffscreenCanvas は width * dpr, height * dpr で作成される
+      expect(createdWidth).toBe(200);
+      expect(createdHeight).toBe(100);
 
       // drawImage の sx, sy は x * dpr, y * dpr
       expect(drawImageSpy).toHaveBeenCalledWith(
-        mockImg,
+        mockBitmap,
         20,  // 10 * 2
         40,  // 20 * 2
         200, // 100 * 2
@@ -109,6 +105,7 @@ describe('CaptureService', () => {
         100,
       );
 
+      expect(mockBitmap.close).toHaveBeenCalled();
       expect(result).toBe('data:image/png;base64,cropped');
     });
   });
@@ -121,17 +118,18 @@ describe('CaptureService', () => {
     it('スクロールキャプチャでページ全体を結合する', async () => {
       const fakeDataUrl = 'data:image/png;base64,abc123';
       mockCaptureVisibleTab.mockResolvedValue(fakeDataUrl);
-      mockSendMessage.mockResolvedValue(undefined);
 
-      mockExecuteScript.mockResolvedValue([{
-        result: {
-          scrollHeight: 2000,
-          viewportHeight: 800,
-          devicePixelRatio: 1,
-        },
-      }]);
+      // 1回目: ページ情報取得、2回目以降: スクロール
+      mockExecuteScript
+        .mockResolvedValueOnce([{
+          result: {
+            scrollHeight: 2000,
+            viewportHeight: 800,
+            devicePixelRatio: 1,
+          },
+        }])
+        .mockResolvedValue([{ result: undefined }]);
 
-      // stitchImages をモック（Canvas + Image の読み込みを回避）
       vi.spyOn(service as any, 'stitchImages').mockResolvedValue('data:image/png;base64,stitched');
 
       const onProgress = vi.fn();
@@ -146,15 +144,16 @@ describe('CaptureService', () => {
     it('上限（10,000px）を超える場合は上限で切る', async () => {
       const fakeDataUrl = 'data:image/png;base64,abc123';
       mockCaptureVisibleTab.mockResolvedValue(fakeDataUrl);
-      mockSendMessage.mockResolvedValue(undefined);
 
-      mockExecuteScript.mockResolvedValue([{
-        result: {
-          scrollHeight: 15000,
-          viewportHeight: 800,
-          devicePixelRatio: 1,
-        },
-      }]);
+      mockExecuteScript
+        .mockResolvedValueOnce([{
+          result: {
+            scrollHeight: 15000,
+            viewportHeight: 800,
+            devicePixelRatio: 1,
+          },
+        }])
+        .mockResolvedValue([{ result: undefined }]);
 
       vi.spyOn(service as any, 'stitchImages').mockResolvedValue('data:image/png;base64,stitched');
 

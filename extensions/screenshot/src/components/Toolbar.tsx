@@ -1,8 +1,8 @@
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import Paper from '@mui/material/Paper';
-import FullscreenIcon from '@mui/icons-material/Fullscreen';
-import CropFreeIcon from '@mui/icons-material/CropFree';
+import ArticleIcon from '@mui/icons-material/Article';
+import ScreenshotMonitorIcon from '@mui/icons-material/ScreenshotMonitor';
 import SettingsIcon from '@mui/icons-material/Settings';
 
 interface ToolbarProps {
@@ -35,17 +35,17 @@ export function Toolbar({ position, onFullPage, onVisibleArea, onSettings }: Too
         pointerEvents: 'auto',
       }}
     >
-      <Tooltip title="全画面">
+      <Tooltip title="全画面" placement="bottom" slotProps={{ popper: { disablePortal: true } }}>
         <IconButton aria-label="全画面" onClick={onFullPage} size="small">
-          <FullscreenIcon />
+          <ArticleIcon />
         </IconButton>
       </Tooltip>
-      <Tooltip title="表示領域">
+      <Tooltip title="表示領域" placement="bottom" slotProps={{ popper: { disablePortal: true } }}>
         <IconButton aria-label="表示領域" onClick={onVisibleArea} size="small">
-          <CropFreeIcon />
+          <ScreenshotMonitorIcon />
         </IconButton>
       </Tooltip>
-      <Tooltip title="設定">
+      <Tooltip title="設定" placement="bottom" slotProps={{ popper: { disablePortal: true } }}>
         <IconButton aria-label="設定" onClick={onSettings} size="small">
           <SettingsIcon />
         </IconButton>

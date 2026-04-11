@@ -1,17 +1,34 @@
 import { OverlayManager } from '../content/OverlayManager';
 import type { BackgroundMessage } from '../types/messages';
 
+async function copyToClipboard(dataUrl: string): Promise<boolean> {
+  try {
+    const response = await fetch(dataUrl);
+    const blob = await response.blob();
+    await navigator.clipboard.write([
+      new ClipboardItem({ [blob.type]: blob }),
+    ]);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export default defineContentScript({
   matches: ['<all_urls>'],
   main() {
     const overlay = new OverlayManager(
       // onMessage: Content → Background へメッセージ送信
       (message) => {
-        chrome.runtime.sendMessage(message, (response) => {
+        chrome.runtime.sendMessage(message, async (response) => {
           if (!response) return;
 
           if (response.type === 'CAPTURE_RESULT') {
-            overlay.showPreview(response.dataUrl, 'success');
+            const copied = await copyToClipboard(response.dataUrl);
+            overlay.showPreview(
+              response.dataUrl,
+              copied ? 'success' : 'error',
+            );
           } else if (response.type === 'CAPTURE_ERROR') {
             overlay.showPreview('', 'error');
           }

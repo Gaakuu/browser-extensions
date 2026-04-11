@@ -10,16 +10,14 @@ export class CaptureService {
   async cropImage(dataUrl: string, rect: CropRect): Promise<string> {
     const { x, y, width, height, devicePixelRatio: dpr } = rect;
 
-    const img = await this.loadImage(dataUrl);
-    const canvas = document.createElement('canvas');
+    const bitmap = await this.loadBitmap(dataUrl);
     const sw = Math.round(width * dpr);
     const sh = Math.round(height * dpr);
-    canvas.width = sw;
-    canvas.height = sh;
 
+    const canvas = new OffscreenCanvas(sw, sh);
     const ctx = canvas.getContext('2d')!;
     ctx.drawImage(
-      img,
+      bitmap,
       Math.round(x * dpr),
       Math.round(y * dpr),
       sw,
@@ -29,8 +27,9 @@ export class CaptureService {
       sw,
       sh,
     );
+    bitmap.close();
 
-    return canvas.toDataURL('image/png');
+    return this.canvasToDataUrl(canvas);
   }
 
   async captureFullPage(
@@ -55,12 +54,13 @@ export class CaptureService {
 
     for (let i = 0; i < totalSlices; i++) {
       const scrollY = i * viewportHeight;
-      await chrome.tabs.sendMessage(tabId, {
-        type: 'SCROLL_TO',
-        scrollY,
+      await chrome.scripting.executeScript({
+        target: { tabId },
+        func: (y: number) => window.scrollTo(0, y),
+        args: [scrollY],
       });
       // ブラウザの描画を待つ
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 150));
 
       const dataUrl = await chrome.tabs.captureVisibleTab(undefined, {
         format: 'png',
@@ -79,31 +79,37 @@ export class CaptureService {
     viewportHeight: number,
     dpr: number,
   ): Promise<string> {
-    const images = await Promise.all(captures.map((url) => this.loadImage(url)));
-    const canvasWidth = images[0].width;
+    const bitmaps = await Promise.all(captures.map((url) => this.loadBitmap(url)));
+    const canvasWidth = bitmaps[0].width;
     const canvasHeight = Math.round(totalHeight * dpr);
 
-    const canvas = document.createElement('canvas');
-    canvas.width = canvasWidth;
-    canvas.height = canvasHeight;
+    const canvas = new OffscreenCanvas(canvasWidth, canvasHeight);
     const ctx = canvas.getContext('2d')!;
 
-    for (let i = 0; i < images.length; i++) {
+    for (let i = 0; i < bitmaps.length; i++) {
       const dy = Math.round(i * viewportHeight * dpr);
       const remainingHeight = canvasHeight - dy;
-      const drawHeight = Math.min(images[i].height, remainingHeight);
-      ctx.drawImage(images[i], 0, 0, canvasWidth, drawHeight, 0, dy, canvasWidth, drawHeight);
+      const drawHeight = Math.min(bitmaps[i].height, remainingHeight);
+      ctx.drawImage(bitmaps[i], 0, 0, canvasWidth, drawHeight, 0, dy, canvasWidth, drawHeight);
+      bitmaps[i].close();
     }
 
-    return canvas.toDataURL('image/png');
+    return this.canvasToDataUrl(canvas);
   }
 
-  private loadImage(dataUrl: string): Promise<HTMLImageElement> {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => resolve(img);
-      img.onerror = reject;
-      img.src = dataUrl;
+  private async loadBitmap(dataUrl: string): Promise<ImageBitmap> {
+    const response = await fetch(dataUrl);
+    const blob = await response.blob();
+    return createImageBitmap(blob);
+  }
+
+  private async canvasToDataUrl(canvas: OffscreenCanvas): Promise<string> {
+    const blob = await canvas.convertToBlob({ type: 'image/png' });
+    return new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
     });
   }
 }

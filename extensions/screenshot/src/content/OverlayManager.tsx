@@ -86,6 +86,7 @@ export class OverlayManager {
 
   showPreview(dataUrl: string, clipboardStatus: 'success' | 'error'): void {
     this.stopDetection();
+    this.host!.style.display = 'block';
     this.state = {
       ...this.state,
       mode: 'preview',
@@ -95,6 +96,19 @@ export class OverlayManager {
       cropRect: null,
     };
     this.render();
+  }
+
+  /** オーバーレイを非表示にしてからキャプチャメッセージを送信する */
+  private requestCapture(message: any): void {
+    this.stopDetection();
+    // React を空にしてから DOM を非表示にし、リペイントを待ってキャプチャ
+    this.root?.render(null);
+    this.host!.style.display = 'none';
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        this.onMessage(message);
+      });
+    });
   }
 
   private startElementDetection(): void {
@@ -114,7 +128,7 @@ export class OverlayManager {
           height: rect.height + padding * 2,
           devicePixelRatio: window.devicePixelRatio,
         };
-        this.onMessage({ type: 'CAPTURE_ELEMENT', rect: cropRect });
+        this.requestCapture({ type: 'CAPTURE_ELEMENT', rect: cropRect });
       },
       onDragStart: (startPoint) => {
         this.startCrop(startPoint);
@@ -137,7 +151,7 @@ export class OverlayManager {
         this.render();
       },
       onCropComplete: (rect) => {
-        this.onMessage({ type: 'CAPTURE_AREA', rect });
+        this.requestCapture({ type: 'CAPTURE_AREA', rect });
       },
       onCancel: () => {
         this.state.mode = 'element';
@@ -267,8 +281,8 @@ export class OverlayManager {
               />
               <Toolbar
                 position="top"
-                onFullPage={() => this.onMessage({ type: 'CAPTURE_FULL_PAGE' })}
-                onVisibleArea={() => this.onMessage({ type: 'CAPTURE_VISIBLE_AREA' })}
+                onFullPage={() => this.requestCapture({ type: 'CAPTURE_FULL_PAGE' })}
+                onVisibleArea={() => this.requestCapture({ type: 'CAPTURE_VISIBLE_AREA' })}
                 onSettings={() => {}}
               />
             </>

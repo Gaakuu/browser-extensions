@@ -8,19 +8,18 @@ interface CaptureOverlayProps {
 
 export function CaptureOverlay({ mode, highlightRect, cropRect }: CaptureOverlayProps) {
   const clipPath = useMemo(() => {
-    if (mode === 'element' && highlightRect) {
-      const { x, y, width, height } = highlightRect;
-      return `polygon(
+    // 穴あきポリゴン: 外側（反時計回り）と内側（時計回り）で描画方向を逆にする
+    const makeHole = (x: number, y: number, width: number, height: number) =>
+      `polygon(
         0% 0%, 0% 100%, 100% 100%, 100% 0%, 0% 0%,
-        ${x}px ${y}px, ${x}px ${y + height}px, ${x + width}px ${y + height}px, ${x + width}px ${y}px, ${x}px ${y}px
+        ${x}px ${y}px, ${x + width}px ${y}px, ${x + width}px ${y + height}px, ${x}px ${y + height}px, ${x}px ${y}px
       )`;
+
+    if (mode === 'element' && highlightRect) {
+      return makeHole(highlightRect.x, highlightRect.y, highlightRect.width, highlightRect.height);
     }
     if (mode === 'crop' && cropRect) {
-      const { x, y, width, height } = cropRect;
-      return `polygon(
-        0% 0%, 0% 100%, 100% 100%, 100% 0%, 0% 0%,
-        ${x}px ${y}px, ${x}px ${y + height}px, ${x + width}px ${y + height}px, ${x + width}px ${y}px, ${x}px ${y}px
-      )`;
+      return makeHole(cropRect.x, cropRect.y, cropRect.width, cropRect.height);
     }
     return undefined;
   }, [mode, highlightRect, cropRect]);

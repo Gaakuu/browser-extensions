@@ -2,6 +2,21 @@ import { CaptureService } from './CaptureService';
 import { DownloadService } from './DownloadService';
 import type { ContentMessage } from '../types/messages';
 
+async function capture(
+  getDataUrl: () => Promise<string>,
+  sendResponse: (response: any) => void,
+) {
+  try {
+    const dataUrl = await getDataUrl();
+    sendResponse({ type: 'CAPTURE_RESULT', dataUrl });
+  } catch (error) {
+    sendResponse({
+      type: 'CAPTURE_ERROR',
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
+  }
+}
+
 export function initBackground() {
   const captureService = new CaptureService();
   const downloadService = new DownloadService();
@@ -21,63 +36,38 @@ export function initBackground() {
 
       switch (message.type) {
         case 'CAPTURE_VISIBLE_AREA': {
-          (async () => {
-            try {
-              const dataUrl = await captureService.captureVisibleArea();
-              await downloadService.copyToClipboard(dataUrl);
-              sendResponse({ type: 'CAPTURE_RESULT', dataUrl });
-            } catch (error) {
-              sendResponse({
-                type: 'CAPTURE_ERROR',
-                error: error instanceof Error ? error.message : 'Unknown error',
-              });
-            }
-          })();
+          capture(
+            () => captureService.captureVisibleArea(),
+            sendResponse,
+          );
           return true;
         }
 
         case 'CAPTURE_FULL_PAGE': {
-          (async () => {
-            try {
-              const dataUrl = await captureService.captureFullPage(
-                tabId!,
-                (progress) => {
-                  chrome.tabs.sendMessage(tabId!, {
-                    type: 'CAPTURE_PROGRESS',
-                    progress,
-                  });
-                },
-              );
-              await downloadService.copyToClipboard(dataUrl);
-              sendResponse({ type: 'CAPTURE_RESULT', dataUrl });
-            } catch (error) {
-              sendResponse({
-                type: 'CAPTURE_ERROR',
-                error: error instanceof Error ? error.message : 'Unknown error',
-              });
-            }
-          })();
+          capture(
+            () => captureService.captureFullPage(
+              tabId!,
+              (progress) => {
+                chrome.tabs.sendMessage(tabId!, {
+                  type: 'CAPTURE_PROGRESS',
+                  progress,
+                });
+              },
+            ),
+            sendResponse,
+          );
           return true;
         }
 
         case 'CAPTURE_ELEMENT':
         case 'CAPTURE_AREA': {
-          (async () => {
-            try {
+          capture(
+            async () => {
               const visibleDataUrl = await captureService.captureVisibleArea();
-              const croppedDataUrl = await captureService.cropImage(
-                visibleDataUrl,
-                message.rect,
-              );
-              await downloadService.copyToClipboard(croppedDataUrl);
-              sendResponse({ type: 'CAPTURE_RESULT', dataUrl: croppedDataUrl });
-            } catch (error) {
-              sendResponse({
-                type: 'CAPTURE_ERROR',
-                error: error instanceof Error ? error.message : 'Unknown error',
-              });
-            }
-          })();
+              return captureService.cropImage(visibleDataUrl, message.rect);
+            },
+            sendResponse,
+          );
           return true;
         }
 
