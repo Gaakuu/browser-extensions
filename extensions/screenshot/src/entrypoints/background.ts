@@ -1,3 +1,5 @@
+import { initBackground } from '../background/initBackground';
+
 export default defineBackground(() => {
-  console.log('Screenshot extension background loaded');
+  initBackground();
 });
