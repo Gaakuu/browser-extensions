@@ -24,5 +24,69 @@
         "content": "$1"
       }
     }
+  },
+  "optionsTitle": {
+    "message": "Tab Switcher — キーボードショートカット"
+  },
+  "currentShortcuts": {
+    "message": "現在のショートカット"
+  },
+  "shortcutNotSet": {
+    "message": "未設定"
+  },
+  "changeShortcuts": {
+    "message": "ショートカットを変更する"
+  },
+  "changeShortcutsDesc": {
+    "message": "Chrome のショートカット設定ページからキーボードショートカットを変更できます。以下の URL をコピーしてアドレスバーに貼り付けてください："
+  },
+  "copyUrl": {
+    "message": "コピー"
+  },
+  "copiedUrl": {
+    "message": "コピーしました！"
+  },
+  "advancedCtrlTab": {
+    "message": "上級者向け: 予約済みショートカットの上書き"
+  },
+  "advancedCtrlTabDesc": {
+    "message": "Ctrl+Tab や Ctrl+P (Cmd+P) などは Chrome の予約済みショートカットのため、通常の設定ページからは割り当てできません。Chrome DevTools を使って上書きできます。"
+  },
+  "advancedCtrlTabSteps": {
+    "message": "手順"
+  },
+  "advancedCtrlTabStep1": {
+    "message": "chrome://extensions を開き、左上の「キーボード ショートカット」をクリック"
+  },
+  "advancedCtrlTabStep2": {
+    "message": "$SHORTCUT$ で DevTools を開く",
+    "placeholders": {
+      "shortcut": {
+        "content": "$1"
+      }
+    }
+  },
+  "advancedCtrlTabStep3": {
+    "message": "以下のコードをコンソールに貼り付けて Enter を押す"
+  },
+  "advancedCtrlTabTradeoff": {
+    "message": "注意: 上書きしたショートカットの元の機能（Ctrl+Tab でタブ切り替え、Ctrl+P で印刷など）は使えなくなります。タブ移動には $ALTERNATIVE$ を使用してください。",
+    "placeholders": {
+      "alternative": {
+        "content": "$1"
+      }
+    }
+  },
+  "advancedCtrlTabAlternativeMac": {
+    "message": "Cmd+Opt+→/←"
+  },
+  "advancedCtrlTabAlternativeOther": {
+    "message": "Ctrl+Page Down/Up"
+  },
+  "devtoolsShortcutMac": {
+    "message": "Cmd+Opt+J"
+  },
+  "devtoolsShortcutOther": {
+    "message": "Ctrl+Shift+J"
   }
 }

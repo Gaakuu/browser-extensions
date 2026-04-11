@@ -12,22 +12,36 @@ import jaMessages from '../src/public/_locales/ja/messages.json';
     const entry = messages[key];
     if (!entry) return key;
     let msg = entry.message;
-    if (substitutions && entry.placeholders) {
-      const subs = Array.isArray(substitutions) ? substitutions : [substitutions];
-      for (const [, ph] of Object.entries(entry.placeholders)) {
-        const index = Number.parseInt(ph.content.replace('$', '')) - 1;
-        if (subs[index] !== undefined) {
-          msg = msg.replace(ph.content, subs[index]);
-        }
+    if (entry.placeholders) {
+      const subs = Array.isArray(substitutions) ? substitutions : substitutions ? [substitutions] : [];
+      // Chrome i18n: メッセージ中の $PLACEHOLDER_NAME$ を placeholders[name].content ($1, $2, ...) 経由で置換
+      for (const [name, ph] of Object.entries(entry.placeholders)) {
+        const index = Number.parseInt(ph.content.replace(/\$/g, '')) - 1;
+        const value = subs[index] ?? ph.content;
+        msg = msg.replace(new RegExp(`\\$${name}\\$`, 'gi'), value);
       }
     }
     return msg;
   };
 
+  const commandsMock = {
+    getAll: () =>
+      Promise.resolve([
+        { name: 'show-tab-switcher', shortcut: '⌘+Shift+Space', description: 'タブ切り替えオーバーレイを表示' },
+        { name: 'search-tabs', shortcut: '⌘+Shift+P', description: 'タブ検索オーバーレイを表示' },
+      ]),
+  };
+
+  const runtimeMock = {
+    id: 'sample-extension-id-12345',
+  };
+
   if (typeof globalThis.chrome === 'undefined') {
-    globalThis.chrome = { i18n: { getMessage } } as typeof chrome;
+    globalThis.chrome = { i18n: { getMessage }, commands: commandsMock, runtime: runtimeMock } as typeof chrome;
   } else {
     globalThis.chrome.i18n = { getMessage } as typeof chrome.i18n;
+    globalThis.chrome.commands = commandsMock as typeof chrome.commands;
+    globalThis.chrome.runtime = { ...globalThis.chrome.runtime, ...runtimeMock } as typeof chrome.runtime;
   }
 }
 

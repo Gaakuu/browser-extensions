@@ -24,5 +24,69 @@
         "content": "$1"
       }
     }
+  },
+  "optionsTitle": {
+    "message": "Tab Switcher — Keyboard Shortcuts"
+  },
+  "currentShortcuts": {
+    "message": "Current Shortcuts"
+  },
+  "shortcutNotSet": {
+    "message": "Not set"
+  },
+  "changeShortcuts": {
+    "message": "Change Shortcuts"
+  },
+  "changeShortcutsDesc": {
+    "message": "You can change keyboard shortcuts from Chrome's shortcut settings page. Copy the URL below and paste it into your address bar:"
+  },
+  "copyUrl": {
+    "message": "Copy"
+  },
+  "copiedUrl": {
+    "message": "Copied!"
+  },
+  "advancedCtrlTab": {
+    "message": "Advanced: Override Reserved Shortcuts"
+  },
+  "advancedCtrlTabDesc": {
+    "message": "Some shortcuts like Ctrl+Tab and Ctrl+P (Cmd+P) are reserved by Chrome and cannot be assigned from the normal settings page. However, you can override them using Chrome DevTools."
+  },
+  "advancedCtrlTabSteps": {
+    "message": "Steps"
+  },
+  "advancedCtrlTabStep1": {
+    "message": "Open chrome://extensions and click \"Keyboard shortcuts\" in the top-left corner"
+  },
+  "advancedCtrlTabStep2": {
+    "message": "Open DevTools with $SHORTCUT$",
+    "placeholders": {
+      "shortcut": {
+        "content": "$1"
+      }
+    }
+  },
+  "advancedCtrlTabStep3": {
+    "message": "Paste the code below into the Console and press Enter"
+  },
+  "advancedCtrlTabTradeoff": {
+    "message": "Note: You will lose the default behavior of overridden shortcuts (e.g., Ctrl+Tab for next tab, Ctrl+P for print). Use $ALTERNATIVE$ for tab navigation instead.",
+    "placeholders": {
+      "alternative": {
+        "content": "$1"
+      }
+    }
+  },
+  "advancedCtrlTabAlternativeMac": {
+    "message": "Cmd+Opt+→/←"
+  },
+  "advancedCtrlTabAlternativeOther": {
+    "message": "Ctrl+Page Down/Up"
+  },
+  "devtoolsShortcutMac": {
+    "message": "Cmd+Opt+J"
+  },
+  "devtoolsShortcutOther": {
+    "message": "Ctrl+Shift+J"
   }
 }
