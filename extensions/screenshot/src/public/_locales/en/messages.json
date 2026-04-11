@@ -1,0 +1,35 @@
+{
+  "extName": {
+    "message": "Screenshot"
+  },
+  "extDescription": {
+    "message": "Capture screenshots with element detection, cropping, and full page support"
+  },
+  "commandCaptureScreenshot": {
+    "message": "Capture screenshot"
+  },
+  "fullPage": {
+    "message": "Full Page"
+  },
+  "visibleArea": {
+    "message": "Visible Area"
+  },
+  "settings": {
+    "message": "Settings"
+  },
+  "save": {
+    "message": "Save"
+  },
+  "close": {
+    "message": "Close"
+  },
+  "copiedToClipboard": {
+    "message": "Copied to clipboard"
+  },
+  "copyFailed": {
+    "message": "Failed to copy to clipboard"
+  },
+  "captureError": {
+    "message": "Cannot capture this page"
+  }
+}
