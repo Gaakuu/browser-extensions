@@ -9,7 +9,7 @@ interface ToolbarProps {
   position: 'top' | 'bottom';
   onFullPage: () => void;
   onVisibleArea: () => void;
-  onSettings: () => void;
+  onSettings: (e: React.MouseEvent) => void;
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
 }

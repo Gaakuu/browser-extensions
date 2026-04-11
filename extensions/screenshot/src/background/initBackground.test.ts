@@ -153,7 +153,7 @@ describe('background entrypoint', () => {
         expect(sendResponse).toHaveBeenCalled();
       });
 
-      expect(mockSaveAsFile).toHaveBeenCalledWith(dataUrl);
+      expect(mockSaveAsFile).toHaveBeenCalledWith(dataUrl, undefined);
       expect(sendResponse).toHaveBeenCalledWith({ success: true });
     });
   });

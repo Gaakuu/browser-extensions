@@ -1,6 +1,6 @@
 export class DownloadService {
-  async saveAsFile(dataUrl: string): Promise<void> {
-    const filename = this.generateFilename();
+  async saveAsFile(dataUrl: string, prefix = 'screenshot'): Promise<void> {
+    const filename = this.generateFilename(prefix);
     return new Promise<void>((resolve, reject) => {
       chrome.downloads.download(
         { url: dataUrl, filename, saveAs: false },
@@ -45,11 +45,11 @@ export class DownloadService {
     }
   }
 
-  private generateFilename(): string {
+  private generateFilename(prefix: string): string {
     const now = new Date();
     const pad = (n: number) => String(n).padStart(2, '0');
     const date = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
     const time = `${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`;
-    return `screenshot_${date}_${time}.png`;
+    return `${prefix}_${date}_${time}.png`;
   }
 }

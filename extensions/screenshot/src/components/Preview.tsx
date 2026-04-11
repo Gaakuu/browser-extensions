@@ -55,9 +55,7 @@ export function Preview({ imageUrl, clipboardStatus, onSave, onClose }: PreviewP
           alignItems: 'center',
           justifyContent: 'center',
           height: 180,
-          cursor: 'pointer',
         }}
-        onClick={onSave}
       >
         <img
           data-testid="preview-image"

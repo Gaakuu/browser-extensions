@@ -2,12 +2,14 @@ import createCache from '@emotion/cache';
 import { CacheProvider } from '@emotion/react';
 import { CssBaseline, ThemeProvider, createTheme, darkThemeOptions } from '@browser-extensions/ui';
 import { createRoot, type Root } from 'react-dom/client';
-import type { CropRect, Point, BackgroundMessage } from '../types/messages';
+import type { CropRect, Point, BackgroundMessage, ScreenshotSettings } from '../types/messages';
 import { CaptureOverlay } from '../components/CaptureOverlay';
 import { Toolbar } from '../components/Toolbar';
 import { Preview } from '../components/Preview';
+import { SettingsPopover } from '../components/SettingsPopover';
 import { ElementDetector } from './ElementDetector';
 import { CropHandler } from './CropHandler';
+import { loadSettings, saveSettings, DEFAULT_SETTINGS } from '../utils/settings';
 
 type OverlayMode = 'idle' | 'element' | 'crop' | 'preview';
 
@@ -27,6 +29,8 @@ export class OverlayManager {
   private elementDetector: ElementDetector | null = null;
   private cropHandler: CropHandler | null = null;
   private paused = false;
+  private settings: ScreenshotSettings = DEFAULT_SETTINGS;
+  private settingsAnchorEl: HTMLElement | null = null;
 
   private state: OverlayState = {
     mode: 'idle',
@@ -47,10 +51,13 @@ export class OverlayManager {
     this.onDismiss = onDismiss;
   }
 
-  show(): void {
+  async show(): Promise<void> {
     if (!this.host) {
       this.createHost();
     }
+
+    this.settings = await loadSettings();
+    this.settingsAnchorEl = null;
 
     this.state = {
       mode: 'element',
@@ -86,7 +93,7 @@ export class OverlayManager {
     return this.host?.style.display === 'block';
   }
 
-  showPreview(dataUrl: string, clipboardStatus: 'success' | 'error'): void {
+  showPreview(dataUrl: string, clipboardStatus: 'success' | 'error' | null): void {
     this.stopDetection();
     this.host!.style.display = 'block';
     this.host!.style.pointerEvents = 'none'; // ページ操作を邪魔しない
@@ -135,6 +142,7 @@ export class OverlayManager {
         this.render();
       },
       onElementSelected: (rect) => {
+        if (this.paused) return;
         const cropRect: CropRect = {
           x: rect.x - ELEMENT_PADDING,
           y: rect.y - ELEMENT_PADDING,
@@ -296,14 +304,40 @@ export class OverlayManager {
                 position="bottom"
                 onFullPage={() => this.requestCapture({ type: 'CAPTURE_FULL_PAGE' })}
                 onVisibleArea={() => this.requestCapture({ type: 'CAPTURE_VISIBLE_AREA' })}
-                onSettings={() => {}}
+                onSettings={(e) => {
+                  this.settingsAnchorEl = e.currentTarget as HTMLElement;
+                  this.render();
+                }}
                 onMouseEnter={() => {
                   this.paused = true;
                   this.state.highlightRect = null;
                   this.render();
                 }}
                 onMouseLeave={() => {
+                  if (!this.settingsAnchorEl) {
+                    this.paused = false;
+                  }
+                }}
+              />
+              <SettingsPopover
+                anchorEl={this.settingsAnchorEl}
+                settings={this.settings}
+                onClose={() => {
+                  this.settingsAnchorEl = null;
                   this.paused = false;
+                  this.render();
+                }}
+                onChange={async (partial) => {
+                  this.settings = await saveSettings(partial);
+                  this.render();
+                }}
+                onMouseEnter={() => {
+                  this.paused = true;
+                }}
+                onMouseLeave={() => {
+                  if (!this.settingsAnchorEl) {
+                    this.paused = false;
+                  }
                 }}
               />
             </>
@@ -313,7 +347,7 @@ export class OverlayManager {
             <Preview
               imageUrl={previewUrl}
               clipboardStatus={clipboardStatus}
-              onSave={() => this.onMessage({ type: 'SAVE_FILE', dataUrl: previewUrl })}
+              onSave={() => this.onMessage({ type: 'SAVE_FILE', dataUrl: previewUrl, filenamePrefix: this.settings.filenamePrefix })}
               onClose={() => this.onDismiss()}
             />
           )}

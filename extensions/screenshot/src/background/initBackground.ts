@@ -73,7 +73,7 @@ export function initBackground() {
         case 'SAVE_FILE': {
           (async () => {
             try {
-              await downloadService.saveAsFile(message.dataUrl);
+              await downloadService.saveAsFile(message.dataUrl, message.filenamePrefix);
               sendResponse({ success: true });
             } catch (error) {
               sendResponse({
@@ -84,6 +84,10 @@ export function initBackground() {
           })();
           return true;
         }
+
+        case 'OPEN_SHORTCUTS':
+          chrome.tabs.create({ url: 'chrome://extensions/shortcuts' });
+          break;
 
         case 'OVERLAY_CLOSED':
           break;

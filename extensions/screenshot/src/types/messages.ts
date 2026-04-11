@@ -29,12 +29,11 @@ export type ContentMessage =
   | { type: 'CAPTURE_FULL_PAGE' }
   | { type: 'CAPTURE_ELEMENT'; rect: CropRect }
   | { type: 'CAPTURE_AREA'; rect: CropRect }
-  | { type: 'SAVE_FILE'; dataUrl: string }
+  | { type: 'SAVE_FILE'; dataUrl: string; filenamePrefix?: string }
   | { type: 'OVERLAY_CLOSED' };
 
 /** 設定データ（Chrome Storage） */
 export interface ScreenshotSettings {
-  elementPadding: number;
-  maxFullPageHeight: number;
-  toolbarPosition: 'top' | 'bottom';
+  autoCopyToClipboard: boolean;
+  filenamePrefix: string;
 }

@@ -1,5 +1,6 @@
 import { OverlayManager } from '../content/OverlayManager';
 import type { BackgroundMessage } from '../types/messages';
+import { loadSettings } from '../utils/settings';
 
 async function copyToClipboard(dataUrl: string): Promise<boolean> {
   try {
@@ -58,19 +59,26 @@ export default defineContentScript({
           if (!response) return;
 
           if (response.type === 'CAPTURE_RESULT') {
-            const copied = await copyToClipboard(response.dataUrl);
-            overlay.showPreview(
-              response.dataUrl,
-              copied ? 'success' : 'error',
-            );
+            const settings = await loadSettings();
+            let clipboardStatus: 'success' | 'error' | null = null;
+            if (settings.autoCopyToClipboard) {
+              const copied = await copyToClipboard(response.dataUrl);
+              clipboardStatus = copied ? 'success' : 'error';
+            }
+            overlay.showPreview(response.dataUrl, clipboardStatus);
           } else if (response.type === 'CAPTURE_FULL_PAGE_SLICES') {
             try {
               const dataUrl = await stitchSlices(
                 response.slices,
                 response.scrollHeight,
               );
-              const copied = await copyToClipboard(dataUrl);
-              overlay.showPreview(dataUrl, copied ? 'success' : 'error');
+              const settings = await loadSettings();
+              let clipboardStatus: 'success' | 'error' | null = null;
+              if (settings.autoCopyToClipboard) {
+                const copied = await copyToClipboard(dataUrl);
+                clipboardStatus = copied ? 'success' : 'error';
+              }
+              overlay.showPreview(dataUrl, clipboardStatus);
             } catch {
               overlay.showPreview('', 'error');
             }
