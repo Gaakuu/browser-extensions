@@ -16,11 +16,16 @@ export class DownloadService {
   }
 
   async copyToClipboard(dataUrl: string): Promise<void> {
-    await chrome.offscreen.createDocument({
-      url: 'offscreen.html',
-      reasons: [chrome.offscreen.Reason.CLIPBOARD],
-      justification: 'Copy screenshot to clipboard',
-    });
+    // 既存の Offscreen Document がある場合は閉じてから作り直す
+    try {
+      await chrome.offscreen.createDocument({
+        url: 'offscreen.html',
+        reasons: [chrome.offscreen.Reason.CLIPBOARD],
+        justification: 'Copy screenshot to clipboard',
+      });
+    } catch {
+      // 既に存在する場合は無視（そのまま使う）
+    }
 
     try {
       const response = await chrome.runtime.sendMessage({
@@ -32,7 +37,11 @@ export class DownloadService {
         throw new Error(response?.error || 'Clipboard copy failed');
       }
     } finally {
-      await chrome.offscreen.closeDocument();
+      try {
+        await chrome.offscreen.closeDocument();
+      } catch {
+        // 閉じれなくても無視
+      }
     }
   }
 
