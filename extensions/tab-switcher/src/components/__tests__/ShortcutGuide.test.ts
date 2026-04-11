@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { type OverrideEntry, OVERRIDE_ENTRIES, getDevtoolsConsoleCode } from '../ShortcutGuide';
+import { getDevtoolsConsoleCode, OVERRIDE_ENTRIES, type OverrideEntry } from '../ShortcutGuide';
 
 describe('getDevtoolsConsoleCode', () => {
   it('拡張機能IDが埋め込まれる', () => {
@@ -31,6 +31,9 @@ describe('getDevtoolsConsoleCode', () => {
 describe('OVERRIDE_ENTRIES', () => {
   it('show-tab-switcher と search-tabs の2エントリがある', () => {
     expect(OVERRIDE_ENTRIES).toHaveLength(2);
-    expect(OVERRIDE_ENTRIES.map((e) => e.commandName)).toEqual(['show-tab-switcher', 'search-tabs']);
+    expect(OVERRIDE_ENTRIES.map((e) => e.commandName)).toEqual([
+      'show-tab-switcher',
+      'search-tabs',
+    ]);
   });
 });
