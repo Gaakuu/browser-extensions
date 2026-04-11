@@ -7,6 +7,13 @@ export default defineBackground(async () => {
 
   console.log('[Tab Switcher] Background initialized, tabs:', manager.getAllTabs().length);
 
+  // 初回インストール時にオプションページを開く
+  chrome.runtime.onInstalled.addListener((details) => {
+    if (details.reason === 'install') {
+      chrome.runtime.openOptionsPage();
+    }
+  });
+
   // タブイベントの監視
   chrome.tabs.onActivated.addListener(({ tabId }) => {
     manager.onTabActivated(tabId);
