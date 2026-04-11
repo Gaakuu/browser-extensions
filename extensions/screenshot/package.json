@@ -1,0 +1,40 @@
+{
+  "name": "@browser-extensions/screenshot",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wxt",
+    "build": "wxt build",
+    "zip": "wxt zip",
+    "compile": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests",
+    "storybook": "storybook dev -p 6007",
+    "build-storybook": "storybook build"
+  },
+  "dependencies": {
+    "@browser-extensions/shared": "workspace:*",
+    "@browser-extensions/ui": "workspace:*",
+    "@emotion/cache": "~11.14.0",
+    "@emotion/react": "~11.14.0",
+    "@emotion/styled": "~11.14.1",
+    "@mui/icons-material": "~9.0.0",
+    "@mui/material": "~9.0.0",
+    "react": "~19.2.5",
+    "react-dom": "~19.2.5"
+  },
+  "devDependencies": {
+    "@chromatic-com/storybook": "^5.1.1",
+    "@storybook/addon-a11y": "^10.3.5",
+    "@storybook/addon-docs": "^10.3.5",
+    "@storybook/addon-onboarding": "^10.3.5",
+    "@storybook/addon-vitest": "^10.3.5",
+    "@storybook/react-vite": "^10.3.5",
+    "@vitest/browser-playwright": "~4.1.4",
+    "@vitest/coverage-v8": "~4.1.4",
+    "@wxt-dev/module-react": "~1.1.5",
+    "playwright": "^1.59.1",
+    "storybook": "^10.3.5",
+    "wxt": "~0.19.29"
+  }
+}

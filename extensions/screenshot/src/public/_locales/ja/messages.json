@@ -1,0 +1,11 @@
+{
+  "extName": {
+    "message": "スクリーンショット"
+  },
+  "extDescription": {
+    "message": "要素検知、トリミング、ページ全体キャプチャに対応したスクリーンショット拡張機能"
+  },
+  "commandCaptureScreenshot": {
+    "message": "スクリーンショットを撮影"
+  }
+}

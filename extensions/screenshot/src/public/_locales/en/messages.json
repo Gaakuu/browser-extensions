@@ -1,0 +1,11 @@
+{
+  "extName": {
+    "message": "Screenshot"
+  },
+  "extDescription": {
+    "message": "Capture screenshots of web pages with element detection, cropping, and full page support"
+  },
+  "commandCaptureScreenshot": {
+    "message": "Capture screenshot"
+  }
+}
