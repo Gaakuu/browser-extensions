@@ -7,5 +7,29 @@
   },
   "commandCaptureScreenshot": {
     "message": "スクリーンショットを撮影"
+  },
+  "fullPage": {
+    "message": "全画面"
+  },
+  "visibleArea": {
+    "message": "表示領域"
+  },
+  "settings": {
+    "message": "設定"
+  },
+  "save": {
+    "message": "保存"
+  },
+  "close": {
+    "message": "閉じる"
+  },
+  "copiedToClipboard": {
+    "message": "クリップボードにコピーしました"
+  },
+  "copyFailed": {
+    "message": "クリップボードへのコピーに失敗しました"
+  },
+  "captureError": {
+    "message": "このページではキャプチャできません"
   }
 }
