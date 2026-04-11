@@ -79,7 +79,8 @@ export class ElementDetector {
       this.rafPending = false;
       if (!this.running) return;
 
-      const el = document.elementFromPoint(e.clientX, e.clientY);
+      const raw = this.getElementBehindOverlay(e.clientX, e.clientY);
+      const el = raw ? this.findMeaningfulElement(raw) : null;
 
       if (!el || this.isExcluded(el)) {
         this.currentElement = null;
@@ -117,10 +118,53 @@ export class ElementDetector {
     }
   }
 
+  /** オーバーレイの裏にあるページ要素を取得 */
+  private getElementBehindOverlay(x: number, y: number): Element | null {
+    const elements = document.elementsFromPoint(x, y);
+    for (const el of elements) {
+      if (!this.isExcluded(el)) return el;
+    }
+    return null;
+  }
+
   private isExcluded(el: Element): boolean {
     return (
       el === this.options.excludeElement ||
       this.options.excludeElement.contains(el)
     );
+  }
+
+  private static MIN_SIZE = 40;
+  private static MAX_VIEWPORT_RATIO = 0.85;
+
+  /** インライン要素・小さすぎる・大きすぎる要素を親へ遡って意味のあるコンテナを返す */
+  private findMeaningfulElement(el: Element): Element | null {
+    let current: Element | null = el;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    while (current && current !== document.body && current !== document.documentElement) {
+      if (this.isExcluded(current)) return null;
+
+      const style = getComputedStyle(current);
+      const rect = current.getBoundingClientRect();
+
+      const isTooSmall =
+        rect.width < ElementDetector.MIN_SIZE ||
+        rect.height < ElementDetector.MIN_SIZE;
+      const isTooLarge =
+        rect.width > vw * ElementDetector.MAX_VIEWPORT_RATIO &&
+        rect.height > vh * ElementDetector.MAX_VIEWPORT_RATIO;
+      const isInline = style.display === 'inline';
+
+      if (isTooSmall || isTooLarge || isInline) {
+        current = current.parentElement;
+        continue;
+      }
+
+      return current;
+    }
+
+    return null;
   }
 }

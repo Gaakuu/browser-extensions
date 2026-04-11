@@ -114,18 +114,28 @@ export class OverlayManager {
   private startElementDetection(): void {
     this.stopDetection();
 
+    const ELEMENT_PADDING = 12;
+
     this.elementDetector = new ElementDetector({
       onHover: (rect) => {
-        this.state.highlightRect = rect;
+        if (rect) {
+          this.state.highlightRect = new DOMRect(
+            rect.x - ELEMENT_PADDING,
+            rect.y - ELEMENT_PADDING,
+            rect.width + ELEMENT_PADDING * 2,
+            rect.height + ELEMENT_PADDING * 2,
+          );
+        } else {
+          this.state.highlightRect = null;
+        }
         this.render();
       },
       onElementSelected: (rect) => {
-        const padding = 8;
         const cropRect: CropRect = {
-          x: rect.x - padding,
-          y: rect.y - padding,
-          width: rect.width + padding * 2,
-          height: rect.height + padding * 2,
+          x: rect.x - ELEMENT_PADDING,
+          y: rect.y - ELEMENT_PADDING,
+          width: rect.width + ELEMENT_PADDING * 2,
+          height: rect.height + ELEMENT_PADDING * 2,
           devicePixelRatio: window.devicePixelRatio,
         };
         this.requestCapture({ type: 'CAPTURE_ELEMENT', rect: cropRect });
@@ -187,6 +197,7 @@ export class OverlayManager {
       margin: 0;
       padding: 0;
       line-height: normal;
+      pointer-events: auto;
     `;
 
     this.shadowRoot = this.host.attachShadow({ mode: 'open' });
@@ -215,6 +226,10 @@ export class OverlayManager {
 
     this.root = createRoot(mountPoint);
 
+    // 要素選択・トリミング中はマウスイベントをページに伝播させない
+    // ホストが pointer-events: auto でイベントを受け止めるので、
+    // ページ側のホバー・クリックは発生しない
+
     // Esc で全体終了
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && this.isVisible() && this.state.mode !== 'crop') {
@@ -231,18 +246,12 @@ export class OverlayManager {
     document.addEventListener('keydown', blockKeyEvent, true);
     document.addEventListener('keyup', blockKeyEvent, true);
 
-    // 背景スクロール防止
+    // プレビューモード時のみスクロール防止（要素選択・トリミング中はスクロール許可）
     document.addEventListener(
       'wheel',
       (e) => {
-        if (!this.isVisible()) return;
-        const path = e.composedPath();
-        const isInsideOverlay = path.some(
-          (el) => el === this.host || (el instanceof Node && this.shadowRoot?.contains(el)),
-        );
-        if (!isInsideOverlay) {
-          e.preventDefault();
-        }
+        if (!this.isVisible() || this.state.mode !== 'preview') return;
+        e.preventDefault();
       },
       { passive: false },
     );

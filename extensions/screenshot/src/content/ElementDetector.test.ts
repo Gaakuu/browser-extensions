@@ -1,10 +1,15 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { ElementDetector } from './ElementDetector';
 
-// jsdom には elementFromPoint がないのでスタブを追加
+// jsdom には elementFromPoint/elementsFromPoint がないのでスタブを追加
 if (!document.elementFromPoint) {
   (document as any).elementFromPoint = () => null;
 }
+if (!document.elementsFromPoint) {
+  (document as any).elementsFromPoint = () => [];
+}
+
+const mockBlockStyle = { display: 'block', position: 'static' } as CSSStyleDeclaration;
 
 describe('ElementDetector', () => {
   let detector: ElementDetector;
@@ -21,6 +26,7 @@ describe('ElementDetector', () => {
 
     // requestAnimationFrame を即時実行に
     vi.spyOn(globalThis, 'requestAnimationFrame').mockImplementation((cb) => { cb(0); return 0; });
+    vi.spyOn(window, 'getComputedStyle').mockReturnValue(mockBlockStyle);
 
     detector = new ElementDetector({
       onHover,
@@ -38,28 +44,24 @@ describe('ElementDetector', () => {
   describe('start / stop', () => {
     it('start() 後に mousemove でリスナーが呼ばれる', () => {
       const el = document.createElement('div');
-      vi.spyOn(document, 'elementFromPoint').mockReturnValue(el);
-      el.getBoundingClientRect = vi.fn().mockReturnValue({ x: 0, y: 0, width: 100, height: 50 });
+      vi.spyOn(document, 'elementsFromPoint').mockReturnValue([el]);
+      el.getBoundingClientRect = vi.fn().mockReturnValue(new DOMRect(0, 0, 200, 100));
 
       detector.start();
       document.dispatchEvent(new MouseEvent('mousemove', { clientX: 50, clientY: 25 }));
 
-      document.dispatchEvent(new MouseEvent('mousemove', { clientX: 50, clientY: 25 }));
-
-      expect(document.elementFromPoint).toHaveBeenCalled();
+      expect(document.elementsFromPoint).toHaveBeenCalled();
     });
 
     it('stop() 後に mousemove でリスナーが呼ばれない', () => {
       const el = document.createElement('div');
-      vi.spyOn(document, 'elementFromPoint').mockReturnValue(el);
+      vi.spyOn(document, 'elementsFromPoint').mockReturnValue([el]);
 
       detector.start();
       detector.stop();
 
       document.dispatchEvent(new MouseEvent('mousemove', { clientX: 50, clientY: 25 }));
 
-      // start→stop で elementFromPoint は start時に1回も呼ばれないはず
-      // (mousemove は stop 後なので)
       expect(onHover).not.toHaveBeenCalled();
     });
   });
@@ -68,7 +70,7 @@ describe('ElementDetector', () => {
     it('mousemove で検知した要素の DOMRect を onHover に渡す', () => {
       const el = document.createElement('div');
       const mockRect = new DOMRect(10, 20, 200, 100);
-      vi.spyOn(document, 'elementFromPoint').mockReturnValue(el);
+      vi.spyOn(document, 'elementsFromPoint').mockReturnValue([el]);
       el.getBoundingClientRect = vi.fn().mockReturnValue(mockRect);
 
       detector.start();
@@ -78,8 +80,7 @@ describe('ElementDetector', () => {
     });
 
     it('excludeElement は検知対象から除外される', () => {
-      vi.spyOn(document, 'elementFromPoint').mockReturnValue(excludeElement);
-      vi.spyOn(globalThis, 'requestAnimationFrame').mockImplementation((cb) => { cb(0); return 0; });
+      vi.spyOn(document, 'elementsFromPoint').mockReturnValue([excludeElement]);
 
       detector.start();
       document.dispatchEvent(new MouseEvent('mousemove', { clientX: 50, clientY: 25 }));
@@ -92,14 +93,11 @@ describe('ElementDetector', () => {
     it('click で onElementSelected が DOMRect 付きで発火する', () => {
       const el = document.createElement('div');
       const mockRect = new DOMRect(10, 20, 200, 100);
-      vi.spyOn(document, 'elementFromPoint').mockReturnValue(el);
+      vi.spyOn(document, 'elementsFromPoint').mockReturnValue([el]);
       el.getBoundingClientRect = vi.fn().mockReturnValue(mockRect);
-      vi.spyOn(globalThis, 'requestAnimationFrame').mockImplementation((cb) => { cb(0); return 0; });
 
       detector.start();
-      // まず mousemove で要素を検知
       document.dispatchEvent(new MouseEvent('mousemove', { clientX: 50, clientY: 25 }));
-      // mousedown → mouseup（移動なし）→ click
       document.dispatchEvent(new MouseEvent('mousedown', { clientX: 50, clientY: 25 }));
       document.dispatchEvent(new MouseEvent('mouseup', { clientX: 50, clientY: 25 }));
       document.dispatchEvent(new MouseEvent('click', { clientX: 50, clientY: 25 }));
@@ -111,22 +109,24 @@ describe('ElementDetector', () => {
   describe('ドラッグ開始', () => {
     it('mousedown + 5px以上の mousemove で onDragStart が発火する', () => {
       const el = document.createElement('div');
-      vi.spyOn(document, 'elementFromPoint').mockReturnValue(el);
-      el.getBoundingClientRect = vi.fn().mockReturnValue(new DOMRect(0, 0, 100, 100));
+      vi.spyOn(document, 'elementsFromPoint').mockReturnValue([el]);
+      el.getBoundingClientRect = vi.fn().mockReturnValue(new DOMRect(0, 0, 200, 100));
+
       detector.start();
       document.dispatchEvent(new MouseEvent('mousedown', { clientX: 50, clientY: 50 }));
-      document.dispatchEvent(new MouseEvent('mousemove', { clientX: 60, clientY: 50 })); // 10px移動
+      document.dispatchEvent(new MouseEvent('mousemove', { clientX: 60, clientY: 50 }));
 
       expect(onDragStart).toHaveBeenCalledWith({ x: 50, y: 50 });
     });
 
     it('5px未満の移動ではドラッグ開始とみなさない', () => {
       const el = document.createElement('div');
-      vi.spyOn(document, 'elementFromPoint').mockReturnValue(el);
-      el.getBoundingClientRect = vi.fn().mockReturnValue(new DOMRect(0, 0, 100, 100));
+      vi.spyOn(document, 'elementsFromPoint').mockReturnValue([el]);
+      el.getBoundingClientRect = vi.fn().mockReturnValue(new DOMRect(0, 0, 200, 100));
+
       detector.start();
       document.dispatchEvent(new MouseEvent('mousedown', { clientX: 50, clientY: 50 }));
-      document.dispatchEvent(new MouseEvent('mousemove', { clientX: 53, clientY: 50 })); // 3px移動
+      document.dispatchEvent(new MouseEvent('mousemove', { clientX: 53, clientY: 50 }));
 
       expect(onDragStart).not.toHaveBeenCalled();
     });

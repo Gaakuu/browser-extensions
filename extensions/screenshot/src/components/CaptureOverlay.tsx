@@ -41,6 +41,7 @@ export function CaptureOverlay({ mode, highlightRect, cropRect }: CaptureOverlay
           inset: 0,
           backgroundColor: 'rgba(0, 0, 0, 0.5)',
           clipPath,
+          transition: 'clip-path 0.15s ease',
         }}
       />
 
@@ -55,8 +56,9 @@ export function CaptureOverlay({ mode, highlightRect, cropRect }: CaptureOverlay
             width: highlightRect.width,
             height: highlightRect.height,
             border: '2px solid #4fc3f7',
-            borderRadius: 2,
+            borderRadius: 8,
             pointerEvents: 'none',
+            transition: 'left 0.15s ease, top 0.15s ease, width 0.15s ease, height 0.15s ease',
           }}
         />
       )}
