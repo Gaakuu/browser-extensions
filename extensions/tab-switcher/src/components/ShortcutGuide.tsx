@@ -22,18 +22,18 @@ function isMac(): boolean {
   return navigator.userAgent.includes('Mac');
 }
 
-interface OverrideEntry {
+export interface OverrideEntry {
   commandName: string;
   keybinding: string;
   label: string;
 }
 
-const OVERRIDE_ENTRIES: OverrideEntry[] = [
+export const OVERRIDE_ENTRIES: OverrideEntry[] = [
   { commandName: 'show-tab-switcher', keybinding: 'Ctrl+Tab', label: 'Tab Switcher → Ctrl+Tab' },
   { commandName: 'search-tabs', keybinding: 'Ctrl+P', label: 'Search Tabs → Ctrl+P (Cmd+P)' },
 ];
 
-function getDevtoolsConsoleCode(extensionId: string, entries: OverrideEntry[]): string {
+export function getDevtoolsConsoleCode(extensionId: string, entries: OverrideEntry[]): string {
   return entries
     .map(
       (e) => `chrome.developerPrivate.updateExtensionCommand({
@@ -54,7 +54,11 @@ export function ShortcutGuide() {
   }, []);
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(SHORTCUTS_URL);
+    try {
+      await navigator.clipboard.writeText(SHORTCUTS_URL);
+    } catch {
+      // Clipboard API が使えない環境（Storybook 等）ではフォールバック不要
+    }
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };

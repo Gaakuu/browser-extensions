@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, within } from 'storybook/test';
+import { expect, userEvent, within } from 'storybook/test';
 import { ShortcutGuide } from './ShortcutGuide';
 
 const meta: Meta<typeof ShortcutGuide> = {
@@ -19,6 +19,12 @@ export const Default: Story = {
     expect(canvas.getByText('chrome://extensions/shortcuts')).toBeInTheDocument();
     // DevTools コードブロックが表示される
     expect(canvas.getByTestId('devtools-code')).toBeInTheDocument();
+    // コピーボタンが存在する
+    const copyButton = canvas.getByRole('button', { name: /コピー/ });
+    expect(copyButton).toBeInTheDocument();
+    // コピーボタンをクリックすると「コピーしました！」に変わる
+    await userEvent.click(copyButton);
+    expect(await canvas.findByText('コピーしました！')).toBeInTheDocument();
   },
 };
 
