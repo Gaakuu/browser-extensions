@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
-import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
 import Paper from '@mui/material/Paper';
-import Snackbar from '@mui/material/Snackbar';
-import Alert from '@mui/material/Alert';
+import Typography from '@mui/material/Typography';
 import SaveIcon from '@mui/icons-material/Save';
 import CloseIcon from '@mui/icons-material/Close';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ErrorIcon from '@mui/icons-material/Error';
+
+const AUTO_CLOSE_MS = 5000;
 
 interface PreviewProps {
   imageUrl: string;
@@ -14,13 +17,16 @@ interface PreviewProps {
 }
 
 export function Preview({ imageUrl, clipboardStatus, onSave, onClose }: PreviewProps) {
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [visible, setVisible] = useState(true);
 
   useEffect(() => {
-    if (clipboardStatus) {
-      setSnackbarOpen(true);
-    }
-  }, [clipboardStatus]);
+    const timer = setTimeout(() => {
+      setVisible(false);
+      setTimeout(onClose, 300); // フェードアウト後に閉じる
+    }, AUTO_CLOSE_MS);
+
+    return () => clearTimeout(timer);
+  }, [onClose]);
 
   return (
     <Paper
@@ -28,78 +34,79 @@ export function Preview({ imageUrl, clipboardStatus, onSave, onClose }: PreviewP
       elevation={12}
       sx={{
         position: 'fixed',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
+        bottom: 20,
+        right: 20,
         zIndex: 2147483647,
-        maxWidth: '80vw',
-        maxHeight: '80vh',
-        display: 'flex',
-        flexDirection: 'column',
-        borderRadius: 2,
+        width: 320,
+        borderRadius: 3,
         overflow: 'hidden',
         pointerEvents: 'auto',
+        opacity: visible ? 1 : 0,
+        transform: visible ? 'translateY(0)' : 'translateY(16px)',
+        transition: 'opacity 0.3s ease, transform 0.3s ease',
       }}
     >
+      {/* サムネイル */}
       <div
         style={{
-          overflow: 'auto',
-          maxHeight: 'calc(80vh - 56px)',
+          position: 'relative',
+          backgroundColor: '#1a1a1a',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: 180,
+          cursor: 'pointer',
         }}
+        onClick={onSave}
       >
         <img
           data-testid="preview-image"
           src={imageUrl}
           alt="Screenshot preview"
           style={{
-            display: 'block',
             maxWidth: '100%',
+            maxHeight: '100%',
+            objectFit: 'contain',
           }}
         />
       </div>
 
+      {/* フッター */}
       <div
         style={{
           display: 'flex',
+          alignItems: 'center',
+          padding: '8px 12px',
           gap: 8,
-          padding: 8,
-          justifyContent: 'flex-end',
         }}
       >
-        <Button
-          variant="contained"
-          startIcon={<SaveIcon />}
-          onClick={onSave}
-          size="small"
-        >
-          保存
-        </Button>
-        <Button
-          variant="outlined"
-          startIcon={<CloseIcon />}
-          onClick={onClose}
-          size="small"
-        >
-          閉じる
-        </Button>
-      </div>
+        {/* ステータス */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4, flex: 1 }}>
+          {clipboardStatus === 'success' ? (
+            <>
+              <CheckCircleIcon sx={{ fontSize: 16, color: '#4caf50' }} />
+              <Typography variant="caption" sx={{ color: '#aaa' }}>
+                コピー済み
+              </Typography>
+            </>
+          ) : clipboardStatus === 'error' ? (
+            <>
+              <ErrorIcon sx={{ fontSize: 16, color: '#f44336' }} />
+              <Typography variant="caption" sx={{ color: '#aaa' }}>
+                コピー失敗
+              </Typography>
+            </>
+          ) : null}
+        </div>
 
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={3000}
-        onClose={() => setSnackbarOpen(false)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert
-          severity={clipboardStatus === 'success' ? 'success' : 'error'}
-          onClose={() => setSnackbarOpen(false)}
-          data-testid="clipboard-toast"
-        >
-          {clipboardStatus === 'success'
-            ? 'クリップボードにコピーしました'
-            : 'クリップボードへのコピーに失敗しました'}
-        </Alert>
-      </Snackbar>
+        {/* アクション */}
+        <IconButton size="small" onClick={onSave} title="保存">
+          <SaveIcon fontSize="small" />
+        </IconButton>
+        <IconButton size="small" onClick={onClose} title="閉じる">
+          <CloseIcon fontSize="small" />
+        </IconButton>
+      </div>
     </Paper>
   );
 }

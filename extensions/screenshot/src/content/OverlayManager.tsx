@@ -60,6 +60,7 @@ export class OverlayManager {
     };
 
     this.host!.style.display = 'block';
+    this.host!.style.pointerEvents = 'auto';
     this.startElementDetection();
     this.render();
   }
@@ -87,6 +88,7 @@ export class OverlayManager {
   showPreview(dataUrl: string, clipboardStatus: 'success' | 'error'): void {
     this.stopDetection();
     this.host!.style.display = 'block';
+    this.host!.style.pointerEvents = 'none'; // ページ操作を邪魔しない
     this.state = {
       ...this.state,
       mode: 'preview',

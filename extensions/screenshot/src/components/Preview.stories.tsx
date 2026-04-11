@@ -22,15 +22,13 @@ export const Default: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     expect(canvas.getByTestId('preview-image')).toBeInTheDocument();
-    expect(canvas.getByText('保存')).toBeInTheDocument();
-    expect(canvas.getByText('閉じる')).toBeInTheDocument();
   },
 };
 
 export const ClickSave: Story = {
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByText('保存'));
+    await userEvent.click(canvas.getByTitle('保存'));
     expect(args.onSave).toHaveBeenCalledOnce();
   },
 };
@@ -38,7 +36,7 @@ export const ClickSave: Story = {
 export const ClickClose: Story = {
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByText('閉じる'));
+    await userEvent.click(canvas.getByTitle('閉じる'));
     expect(args.onClose).toHaveBeenCalledOnce();
   },
 };
@@ -49,7 +47,7 @@ export const ClipboardSuccess: Story = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    expect(canvas.getByText('クリップボードにコピーしました')).toBeInTheDocument();
+    expect(canvas.getByText('コピー済み')).toBeInTheDocument();
   },
 };
 
@@ -59,6 +57,6 @@ export const ClipboardError: Story = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    expect(canvas.getByText('クリップボードへのコピーに失敗しました')).toBeInTheDocument();
+    expect(canvas.getByText('コピー失敗')).toBeInTheDocument();
   },
 };
