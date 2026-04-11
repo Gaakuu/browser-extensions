@@ -35,14 +35,14 @@ export function Toolbar({ position, onFullPage, onVisibleArea, onSettings }: Too
         pointerEvents: 'auto',
       }}
     >
-      <Tooltip title="全画面" placement="bottom" slotProps={{ popper: { disablePortal: true } }}>
-        <IconButton aria-label="全画面" onClick={onFullPage} size="small">
-          <ArticleIcon />
-        </IconButton>
-      </Tooltip>
       <Tooltip title="表示領域" placement="bottom" slotProps={{ popper: { disablePortal: true } }}>
         <IconButton aria-label="表示領域" onClick={onVisibleArea} size="small">
           <ScreenshotMonitorIcon />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="全ページ" placement="bottom" slotProps={{ popper: { disablePortal: true } }}>
+        <IconButton aria-label="全ページ" onClick={onFullPage} size="small">
+          <ArticleIcon />
         </IconButton>
       </Tooltip>
       <Tooltip title="設定" placement="bottom" slotProps={{ popper: { disablePortal: true } }}>

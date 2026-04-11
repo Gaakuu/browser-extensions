@@ -9,7 +9,7 @@ const mockSaveAsFile = vi.fn();
 vi.mock('./CaptureService', () => ({
   CaptureService: class {
     captureVisibleArea = mockCaptureVisibleArea;
-    captureFullPage = mockCaptureFullPage;
+    captureFullPageSlices = mockCaptureFullPage;
     cropImage = mockCropImage;
   },
 }));
@@ -116,9 +116,9 @@ describe('background entrypoint', () => {
       });
     });
 
-    it('CAPTURE_FULL_PAGE で captureFullPage を呼び CAPTURE_RESULT を返す', async () => {
-      const fakeDataUrl = 'data:image/png;base64,fullpage';
-      mockCaptureFullPage.mockResolvedValue(fakeDataUrl);
+    it('CAPTURE_FULL_PAGE で captureFullPageSlices を呼び CAPTURE_FULL_PAGE_SLICES を返す', async () => {
+      const mockResult = { slices: ['s1', 's2'], scrollHeight: 1800, viewportHeight: 900 };
+      mockCaptureFullPage.mockResolvedValue(mockResult);
 
       const sendResponse = vi.fn();
       messageListener(
@@ -131,10 +131,10 @@ describe('background entrypoint', () => {
         expect(sendResponse).toHaveBeenCalled();
       });
 
-      expect(mockCaptureFullPage).toHaveBeenCalledWith(1, expect.any(Function));
+      expect(mockCaptureFullPage).toHaveBeenCalledWith(1);
       expect(sendResponse).toHaveBeenCalledWith({
-        type: 'CAPTURE_RESULT',
-        dataUrl: fakeDataUrl,
+        type: 'CAPTURE_FULL_PAGE_SLICES',
+        ...mockResult,
       });
     });
 

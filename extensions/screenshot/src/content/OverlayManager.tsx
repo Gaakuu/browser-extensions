@@ -101,7 +101,6 @@ export class OverlayManager {
   /** オーバーレイを非表示にしてからキャプチャメッセージを送信する */
   private requestCapture(message: any): void {
     this.stopDetection();
-    // React を空にしてから DOM を非表示にし、リペイントを待ってキャプチャ
     this.root?.render(null);
     this.host!.style.display = 'none';
     requestAnimationFrame(() => {
@@ -110,6 +109,7 @@ export class OverlayManager {
       });
     });
   }
+
 
   private startElementDetection(): void {
     this.stopDetection();

@@ -19,7 +19,7 @@ export const Top: Story = {
   args: { position: 'top' },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    expect(canvas.getByLabelText('全画面')).toBeInTheDocument();
+    expect(canvas.getByLabelText('全ページ')).toBeInTheDocument();
     expect(canvas.getByLabelText('表示領域')).toBeInTheDocument();
     expect(canvas.getByLabelText('設定')).toBeInTheDocument();
   },
@@ -32,7 +32,7 @@ export const Bottom: Story = {
 export const ClickFullPage: Story = {
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByLabelText('全画面'));
+    await userEvent.click(canvas.getByLabelText('全ページ'));
     expect(args.onFullPage).toHaveBeenCalledOnce();
   },
 };

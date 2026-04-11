@@ -1,6 +1,6 @@
 import type { CropRect } from '../types/messages';
 
-const MAX_FULL_PAGE_HEIGHT = 10000;
+const MAX_FULL_PAGE_HEIGHT = 16384;
 
 export class CaptureService {
   async captureVisibleArea(): Promise<string> {
@@ -32,69 +32,85 @@ export class CaptureService {
     return this.canvasToDataUrl(canvas);
   }
 
-  async captureFullPage(
-    tabId: number,
-    onProgress?: (progress: number) => void,
-  ): Promise<string> {
-    const [{ result: pageInfo }] = await chrome.scripting.executeScript({
-      target: { tabId },
-      func: () => ({
-        scrollHeight: document.documentElement.scrollHeight,
-        viewportHeight: window.innerHeight,
-        devicePixelRatio: window.devicePixelRatio,
-      }),
-    });
+  /**
+   * CDP でフルページキャプチャ
+   * スクロールせず、clip の y 位置をずらしてチャンクごとにキャプチャ
+   * 固定ヘッダーは最初のチャンクにのみ含まれる
+   */
+  async captureFullPageSlices(tabId: number): Promise<{
+    slices: string[];
+    scrollHeight: number;
+    viewportHeight: number;
+  }> {
+    const target = { tabId };
 
-    const totalHeight = Math.min(pageInfo.scrollHeight, MAX_FULL_PAGE_HEIGHT);
-    const viewportHeight = pageInfo.viewportHeight;
-    const dpr = pageInfo.devicePixelRatio;
-    const totalSlices = Math.ceil(totalHeight / viewportHeight);
+    await chrome.debugger.attach(target, '1.3');
 
-    const captures: string[] = [];
+    try {
+      // ページ情報を取得
+      const { result: metricsResult } = await chrome.debugger.sendCommand(
+        target,
+        'Runtime.evaluate',
+        {
+          expression: `JSON.stringify({
+            scrollWidth: Math.max(document.documentElement.scrollWidth, document.documentElement.clientWidth),
+            scrollHeight: Math.min(document.documentElement.scrollHeight, ${MAX_FULL_PAGE_HEIGHT}),
+            viewportHeight: window.innerHeight
+          })`,
+          returnByValue: true,
+        },
+      ) as any;
 
-    for (let i = 0; i < totalSlices; i++) {
-      const scrollY = i * viewportHeight;
-      await chrome.scripting.executeScript({
-        target: { tabId },
-        func: (y: number) => window.scrollTo(0, y),
-        args: [scrollY],
+      const metrics = JSON.parse(metricsResult.value);
+      const { scrollWidth, scrollHeight, viewportHeight } = metrics;
+
+      // スクロールをページ先頭に
+      await chrome.debugger.sendCommand(target, 'Runtime.evaluate', {
+        expression: 'window.scrollTo(0, 0)',
       });
-      // ブラウザの描画を待つ
-      await new Promise((resolve) => setTimeout(resolve, 150));
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
-      const dataUrl = await chrome.tabs.captureVisibleTab(undefined, {
-        format: 'png',
-      });
-      captures.push(dataUrl);
+      // 1枚目: 素のビューポートキャプチャ
+      const { data: firstData } = await chrome.debugger.sendCommand(
+        target,
+        'Page.captureScreenshot',
+        { format: 'png' },
+      ) as any;
 
-      onProgress?.(((i + 1) / totalSlices) * 100);
+      const slices: string[] = [firstData];
+
+      // 2枚目以降: clip で y をずらしてキャプチャ
+      const totalSlices = Math.ceil(scrollHeight / viewportHeight);
+
+      for (let i = 1; i < totalSlices; i++) {
+        const y = i * viewportHeight;
+        const remaining = scrollHeight - y;
+        const clipHeight = Math.min(viewportHeight, remaining);
+        if (clipHeight <= 0) break;
+
+        const { data } = await chrome.debugger.sendCommand(
+          target,
+          'Page.captureScreenshot',
+          {
+            format: 'png',
+            clip: {
+              x: 0,
+              y,
+              width: scrollWidth,
+              height: clipHeight,
+              scale: 1,
+            },
+            captureBeyondViewport: true,
+          },
+        ) as any;
+
+        slices.push(data);
+      }
+
+      return { slices, scrollHeight, viewportHeight };
+    } finally {
+      await chrome.debugger.detach(target);
     }
-
-    return this.stitchImages(captures, totalHeight, viewportHeight, dpr);
-  }
-
-  private async stitchImages(
-    captures: string[],
-    totalHeight: number,
-    viewportHeight: number,
-    dpr: number,
-  ): Promise<string> {
-    const bitmaps = await Promise.all(captures.map((url) => this.loadBitmap(url)));
-    const canvasWidth = bitmaps[0].width;
-    const canvasHeight = Math.round(totalHeight * dpr);
-
-    const canvas = new OffscreenCanvas(canvasWidth, canvasHeight);
-    const ctx = canvas.getContext('2d')!;
-
-    for (let i = 0; i < bitmaps.length; i++) {
-      const dy = Math.round(i * viewportHeight * dpr);
-      const remainingHeight = canvasHeight - dy;
-      const drawHeight = Math.min(bitmaps[i].height, remainingHeight);
-      ctx.drawImage(bitmaps[i], 0, 0, canvasWidth, drawHeight, 0, dy, canvasWidth, drawHeight);
-      bitmaps[i].close();
-    }
-
-    return this.canvasToDataUrl(canvas);
   }
 
   private async loadBitmap(dataUrl: string): Promise<ImageBitmap> {

@@ -44,18 +44,17 @@ export function initBackground() {
         }
 
         case 'CAPTURE_FULL_PAGE': {
-          capture(
-            () => captureService.captureFullPage(
-              tabId!,
-              (progress) => {
-                chrome.tabs.sendMessage(tabId!, {
-                  type: 'CAPTURE_PROGRESS',
-                  progress,
-                });
-              },
-            ),
-            sendResponse,
-          );
+          (async () => {
+            try {
+              const result = await captureService.captureFullPageSlices(tabId!);
+              sendResponse({ type: 'CAPTURE_FULL_PAGE_SLICES', ...result });
+            } catch (error) {
+              sendResponse({
+                type: 'CAPTURE_ERROR',
+                error: error instanceof Error ? error.message : 'Unknown error',
+              });
+            }
+          })();
           return true;
         }
 

@@ -14,6 +14,40 @@ async function copyToClipboard(dataUrl: string): Promise<boolean> {
   }
 }
 
+/** base64 スライスを Canvas でスティッチ（各画像の実際の高さで配置） */
+async function stitchSlices(
+  slices: string[],
+  scrollHeight: number,
+): Promise<string> {
+  const images = await Promise.all(
+    slices.map(
+      (base64) =>
+        new Promise<HTMLImageElement>((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => resolve(img);
+          img.onerror = reject;
+          img.src = `data:image/png;base64,${base64}`;
+        }),
+    ),
+  );
+
+  const canvasWidth = images[0].naturalWidth;
+  const totalHeight = images.reduce((sum, img) => sum + img.naturalHeight, 0);
+
+  const canvas = document.createElement('canvas');
+  canvas.width = canvasWidth;
+  canvas.height = totalHeight;
+  const ctx = canvas.getContext('2d')!;
+
+  let dy = 0;
+  for (const img of images) {
+    ctx.drawImage(img, 0, dy);
+    dy += img.naturalHeight;
+  }
+
+  return canvas.toDataURL('image/png');
+}
+
 export default defineContentScript({
   matches: ['<all_urls>'],
   main() {
@@ -29,6 +63,17 @@ export default defineContentScript({
               response.dataUrl,
               copied ? 'success' : 'error',
             );
+          } else if (response.type === 'CAPTURE_FULL_PAGE_SLICES') {
+            try {
+              const dataUrl = await stitchSlices(
+                response.slices,
+                response.scrollHeight,
+              );
+              const copied = await copyToClipboard(dataUrl);
+              overlay.showPreview(dataUrl, copied ? 'success' : 'error');
+            } catch {
+              overlay.showPreview('', 'error');
+            }
           } else if (response.type === 'CAPTURE_ERROR') {
             overlay.showPreview('', 'error');
           }
@@ -50,7 +95,6 @@ export default defineContentScript({
             break;
 
           case 'CAPTURE_PROGRESS':
-            // プログレス表示（将来実装）
             break;
         }
       },
