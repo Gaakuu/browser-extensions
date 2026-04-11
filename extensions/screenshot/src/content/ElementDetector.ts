@@ -106,16 +106,25 @@ export class ElementDetector {
     this.mouseDownPoint = null;
   }
 
-  private handleClick(_e: MouseEvent): void {
+  private handleClick(e: MouseEvent): void {
     if (this.isDragging) {
       this.isDragging = false;
       return;
     }
 
+    // オーバーレイ内（ツールバー等）のクリックは無視
+    if (this.isClickInsideOverlay(e)) return;
+
     if (this.currentElement && !this.isExcluded(this.currentElement)) {
       const rect = this.currentElement.getBoundingClientRect();
       this.options.onElementSelected(rect);
     }
+  }
+
+  private isClickInsideOverlay(e: MouseEvent): boolean {
+    return e.composedPath().some(
+      (el) => el instanceof HTMLElement && el.getAttribute('data-testid') === 'toolbar',
+    );
   }
 
   /** オーバーレイの裏にあるページ要素を取得 */

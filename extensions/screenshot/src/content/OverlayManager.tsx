@@ -26,6 +26,7 @@ export class OverlayManager {
   private emotionCache: ReturnType<typeof createCache> | null = null;
   private elementDetector: ElementDetector | null = null;
   private cropHandler: CropHandler | null = null;
+  private paused = false;
 
   private state: OverlayState = {
     mode: 'idle',
@@ -120,6 +121,7 @@ export class OverlayManager {
 
     this.elementDetector = new ElementDetector({
       onHover: (rect) => {
+        if (this.paused) return;
         if (rect) {
           this.state.highlightRect = new DOMRect(
             rect.x - ELEMENT_PADDING,
@@ -291,10 +293,18 @@ export class OverlayManager {
                 cropRect={cropRect}
               />
               <Toolbar
-                position="top"
+                position="bottom"
                 onFullPage={() => this.requestCapture({ type: 'CAPTURE_FULL_PAGE' })}
                 onVisibleArea={() => this.requestCapture({ type: 'CAPTURE_VISIBLE_AREA' })}
                 onSettings={() => {}}
+                onMouseEnter={() => {
+                  this.paused = true;
+                  this.state.highlightRect = null;
+                  this.render();
+                }}
+                onMouseLeave={() => {
+                  this.paused = false;
+                }}
               />
             </>
           )}

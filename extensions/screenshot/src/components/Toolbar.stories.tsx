@@ -9,6 +9,8 @@ const meta: Meta<typeof Toolbar> = {
     onFullPage: fn(),
     onVisibleArea: fn(),
     onSettings: fn(),
+    onMouseEnter: fn(),
+    onMouseLeave: fn(),
   },
 };
 
@@ -50,5 +52,15 @@ export const ClickSettings: Story = {
     const canvas = within(canvasElement);
     await userEvent.click(canvas.getByLabelText('設定'));
     expect(args.onSettings).toHaveBeenCalledOnce();
+  },
+};
+
+export const MouseEnterLeave: Story = {
+  play: async ({ canvasElement, args }) => {
+    const toolbar = canvasElement.querySelector('[data-testid="toolbar"]')!;
+    await userEvent.hover(toolbar);
+    expect(args.onMouseEnter).toHaveBeenCalled();
+    await userEvent.unhover(toolbar);
+    expect(args.onMouseLeave).toHaveBeenCalled();
   },
 };

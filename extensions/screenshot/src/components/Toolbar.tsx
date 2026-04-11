@@ -10,9 +10,11 @@ interface ToolbarProps {
   onFullPage: () => void;
   onVisibleArea: () => void;
   onSettings: () => void;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
 }
 
-export function Toolbar({ position, onFullPage, onVisibleArea, onSettings }: ToolbarProps) {
+export function Toolbar({ position, onFullPage, onVisibleArea, onSettings, onMouseEnter, onMouseLeave }: ToolbarProps) {
   const positionStyle = position === 'top'
     ? { top: 16, bottom: 'auto' as const }
     : { bottom: 16, top: 'auto' as const };
@@ -21,6 +23,8 @@ export function Toolbar({ position, onFullPage, onVisibleArea, onSettings }: Too
     <Paper
       data-testid="toolbar"
       elevation={8}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
       sx={{
         position: 'fixed',
         left: '50%',

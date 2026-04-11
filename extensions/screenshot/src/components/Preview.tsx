@@ -38,7 +38,7 @@ export function Preview({ imageUrl, clipboardStatus, onSave, onClose }: PreviewP
         right: 20,
         zIndex: 2147483647,
         width: 320,
-        borderRadius: 3,
+        borderRadius: 2,
         overflow: 'hidden',
         pointerEvents: 'auto',
         opacity: visible ? 1 : 0,
