@@ -122,9 +122,9 @@ export class ElementDetector {
   }
 
   private isClickInsideOverlay(e: MouseEvent): boolean {
-    return e.composedPath().some(
-      (el) => el instanceof HTMLElement && el.getAttribute('data-testid') === 'toolbar',
-    );
+    return e
+      .composedPath()
+      .some((el) => el instanceof HTMLElement && el.getAttribute('data-testid') === 'toolbar');
   }
 
   /** オーバーレイの裏にあるページ要素を取得 */
@@ -137,10 +137,7 @@ export class ElementDetector {
   }
 
   private isExcluded(el: Element): boolean {
-    return (
-      el === this.options.excludeElement ||
-      this.options.excludeElement.contains(el)
-    );
+    return el === this.options.excludeElement || this.options.excludeElement.contains(el);
   }
 
   private static MIN_SIZE = 40;
@@ -159,8 +156,7 @@ export class ElementDetector {
       const rect = current.getBoundingClientRect();
 
       const isTooSmall =
-        rect.width < ElementDetector.MIN_SIZE ||
-        rect.height < ElementDetector.MIN_SIZE;
+        rect.width < ElementDetector.MIN_SIZE || rect.height < ElementDetector.MIN_SIZE;
       const isTooLarge =
         rect.width > vw * ElementDetector.MAX_VIEWPORT_RATIO &&
         rect.height > vh * ElementDetector.MAX_VIEWPORT_RATIO;

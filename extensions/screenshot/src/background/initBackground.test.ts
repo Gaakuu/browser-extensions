@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // CaptureService / DownloadService のモック
 const mockCaptureVisibleArea = vi.fn();
@@ -22,28 +22,37 @@ vi.mock('./DownloadService', () => ({
 
 // Chrome API をグローバルに設定
 let commandListener: (command: string) => void;
-let messageListener: (message: any, sender: any, sendResponse: (response?: any) => void) => boolean | void;
+let messageListener: (
+  message: unknown,
+  sender: unknown,
+  sendResponse: (response?: unknown) => void,
+) => boolean | void;
 const mockTabsSendMessage = vi.fn();
 const mockTabsQuery = vi.fn();
 
-(globalThis as any).chrome = {
+(globalThis as unknown as { chrome: unknown }).chrome = {
   commands: {
     onCommand: {
-      addListener: (cb: any) => { commandListener = cb; },
+      addListener: (cb: typeof commandListener) => {
+        commandListener = cb;
+      },
     },
   },
   runtime: {
     onMessage: {
-      addListener: (cb: any) => { messageListener = cb; },
+      addListener: (cb: typeof messageListener) => {
+        messageListener = cb;
+      },
     },
   },
   tabs: {
-    query: (...args: any[]) => mockTabsQuery(...args),
-    sendMessage: (...args: any[]) => mockTabsSendMessage(...args),
+    query: (...args: unknown[]) => mockTabsQuery(...args),
+    sendMessage: (...args: unknown[]) => mockTabsSendMessage(...args),
   },
 };
 
 import { initBackground } from './initBackground';
+
 initBackground();
 
 describe('background entrypoint', () => {
@@ -73,11 +82,7 @@ describe('background entrypoint', () => {
       mockCaptureVisibleArea.mockResolvedValue(fakeDataUrl);
 
       const sendResponse = vi.fn();
-      messageListener(
-        { type: 'CAPTURE_VISIBLE_AREA' },
-        { tab: { id: 1 } },
-        sendResponse,
-      );
+      messageListener({ type: 'CAPTURE_VISIBLE_AREA' }, { tab: { id: 1 } }, sendResponse);
 
       await vi.waitFor(() => {
         expect(sendResponse).toHaveBeenCalled();
@@ -99,11 +104,7 @@ describe('background entrypoint', () => {
       mockCropImage.mockResolvedValue(croppedDataUrl);
 
       const sendResponse = vi.fn();
-      messageListener(
-        { type: 'CAPTURE_ELEMENT', rect },
-        { tab: { id: 1 } },
-        sendResponse,
-      );
+      messageListener({ type: 'CAPTURE_ELEMENT', rect }, { tab: { id: 1 } }, sendResponse);
 
       await vi.waitFor(() => {
         expect(sendResponse).toHaveBeenCalled();
@@ -121,11 +122,7 @@ describe('background entrypoint', () => {
       mockCaptureFullPage.mockResolvedValue(mockResult);
 
       const sendResponse = vi.fn();
-      messageListener(
-        { type: 'CAPTURE_FULL_PAGE' },
-        { tab: { id: 1 } },
-        sendResponse,
-      );
+      messageListener({ type: 'CAPTURE_FULL_PAGE' }, { tab: { id: 1 } }, sendResponse);
 
       await vi.waitFor(() => {
         expect(sendResponse).toHaveBeenCalled();
@@ -143,11 +140,7 @@ describe('background entrypoint', () => {
       mockSaveAsFile.mockResolvedValue(undefined);
 
       const sendResponse = vi.fn();
-      messageListener(
-        { type: 'SAVE_FILE', dataUrl },
-        { tab: { id: 1 } },
-        sendResponse,
-      );
+      messageListener({ type: 'SAVE_FILE', dataUrl }, { tab: { id: 1 } }, sendResponse);
 
       await vi.waitFor(() => {
         expect(sendResponse).toHaveBeenCalled();

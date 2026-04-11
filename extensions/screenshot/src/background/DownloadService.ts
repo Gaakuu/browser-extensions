@@ -2,16 +2,13 @@ export class DownloadService {
   async saveAsFile(dataUrl: string, prefix = 'screenshot'): Promise<void> {
     const filename = this.generateFilename(prefix);
     return new Promise<void>((resolve, reject) => {
-      chrome.downloads.download(
-        { url: dataUrl, filename, saveAs: false },
-        (downloadId) => {
-          if (chrome.runtime.lastError) {
-            reject(new Error(chrome.runtime.lastError.message));
-          } else {
-            resolve();
-          }
-        },
-      );
+      chrome.downloads.download({ url: dataUrl, filename, saveAs: false }, (downloadId) => {
+        if (chrome.runtime.lastError) {
+          reject(new Error(chrome.runtime.lastError.message));
+        } else {
+          resolve();
+        }
+      });
     });
   }
 

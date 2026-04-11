@@ -1,6 +1,6 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { CropHandler } from './CropHandler';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { CropRect } from '../types/messages';
+import { CropHandler } from './CropHandler';
 
 describe('CropHandler', () => {
   let handler: CropHandler;
@@ -47,13 +47,15 @@ describe('CropHandler', () => {
       document.dispatchEvent(new MouseEvent('mousemove', { clientX: 200, clientY: 150 }));
       document.dispatchEvent(new MouseEvent('mouseup', { clientX: 200, clientY: 150 }));
 
-      expect(onCropComplete).toHaveBeenCalledWith(expect.objectContaining({
-        x: 100,
-        y: 100,
-        width: 100,
-        height: 50,
-        devicePixelRatio: 2,
-      }));
+      expect(onCropComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          x: 100,
+          y: 100,
+          width: 100,
+          height: 50,
+          devicePixelRatio: 2,
+        }),
+      );
     });
   });
 
@@ -63,7 +65,10 @@ describe('CropHandler', () => {
       document.dispatchEvent(new MouseEvent('mousemove', { clientX: 150, clientY: 200 }));
 
       expect(onCropUpdate).toHaveBeenCalledWith({
-        x: 50, y: 50, width: 100, height: 150,
+        x: 50,
+        y: 50,
+        width: 100,
+        height: 150,
       });
     });
 
@@ -72,7 +77,10 @@ describe('CropHandler', () => {
       document.dispatchEvent(new MouseEvent('mousemove', { clientX: 50, clientY: 50 }));
 
       expect(onCropUpdate).toHaveBeenCalledWith({
-        x: 50, y: 50, width: 100, height: 150,
+        x: 50,
+        y: 50,
+        width: 100,
+        height: 150,
       });
     });
 
@@ -81,7 +89,10 @@ describe('CropHandler', () => {
       document.dispatchEvent(new MouseEvent('mousemove', { clientX: 100, clientY: 150 }));
 
       expect(onCropUpdate).toHaveBeenCalledWith({
-        x: 100, y: 50, width: 100, height: 100,
+        x: 100,
+        y: 50,
+        width: 100,
+        height: 100,
       });
     });
 
@@ -90,7 +101,10 @@ describe('CropHandler', () => {
       document.dispatchEvent(new MouseEvent('mousemove', { clientX: 200, clientY: 50 }));
 
       expect(onCropUpdate).toHaveBeenCalledWith({
-        x: 100, y: 50, width: 100, height: 100,
+        x: 100,
+        y: 50,
+        width: 100,
+        height: 100,
       });
     });
   });
@@ -125,9 +139,11 @@ describe('CropHandler', () => {
       handler.start({ x: 10, y: 20 });
       document.dispatchEvent(new MouseEvent('mouseup', { clientX: 110, clientY: 70 }));
 
-      expect(onCropComplete).toHaveBeenCalledWith(expect.objectContaining({
-        devicePixelRatio: 3,
-      }));
+      expect(onCropComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          devicePixelRatio: 3,
+        }),
+      );
     });
   });
 });

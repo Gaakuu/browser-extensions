@@ -1,12 +1,12 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ElementDetector } from './ElementDetector';
 
 // jsdom には elementFromPoint/elementsFromPoint がないのでスタブを追加
 if (!document.elementFromPoint) {
-  (document as any).elementFromPoint = () => null;
+  document.elementFromPoint = () => null;
 }
 if (!document.elementsFromPoint) {
-  (document as any).elementsFromPoint = () => [];
+  document.elementsFromPoint = () => [];
 }
 
 const mockBlockStyle = { display: 'block', position: 'static' } as CSSStyleDeclaration;
@@ -25,7 +25,10 @@ describe('ElementDetector', () => {
     onDragStart = vi.fn();
     excludeElement = document.createElement('div');
 
-    vi.spyOn(globalThis, 'requestAnimationFrame').mockImplementation((cb) => { cb(0); return 0; });
+    vi.spyOn(globalThis, 'requestAnimationFrame').mockImplementation((cb) => {
+      cb(0);
+      return 0;
+    });
     vi.spyOn(window, 'getComputedStyle').mockReturnValue(mockBlockStyle);
 
     detector = new ElementDetector({
@@ -196,7 +199,11 @@ describe('ElementDetector', () => {
 
       // composedPath にツールバーを含むクリックイベントを作成
       const clickEvent = new MouseEvent('click', { clientX: 50, clientY: 25 });
-      vi.spyOn(clickEvent, 'composedPath').mockReturnValue([toolbar, excludeElement, document.body]);
+      vi.spyOn(clickEvent, 'composedPath').mockReturnValue([
+        toolbar,
+        excludeElement,
+        document.body,
+      ]);
       document.dispatchEvent(clickEvent);
 
       expect(onElementSelected).not.toHaveBeenCalled();

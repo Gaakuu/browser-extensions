@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { CropRect } from '../types/messages';
 
 // Chrome API モック
@@ -35,10 +35,7 @@ describe('CaptureService', () => {
 
       const result = await service.captureVisibleArea();
 
-      expect(mockCaptureVisibleTab).toHaveBeenCalledWith(
-        undefined,
-        { format: 'png' },
-      );
+      expect(mockCaptureVisibleTab).toHaveBeenCalledWith(undefined, { format: 'png' });
       expect(result).toBe(fakeDataUrl);
     });
 
@@ -68,35 +65,40 @@ describe('CaptureService', () => {
       const mockBitmap = { width: 400, height: 300, close: vi.fn() };
       const mockBlob = new Blob(['fake'], { type: 'image/png' });
 
-      vi.spyOn(service as any, 'loadBitmap').mockResolvedValue(mockBitmap);
+      // @ts-expect-error accessing private method for test
+      vi.spyOn(service, 'loadBitmap').mockResolvedValue(mockBitmap);
 
       let createdWidth = 0;
       let createdHeight = 0;
-      vi.stubGlobal('OffscreenCanvas', class {
-        width: number;
-        height: number;
-        constructor(w: number, h: number) {
-          this.width = w;
-          this.height = h;
-          createdWidth = w;
-          createdHeight = h;
-        }
-        getContext() { return { drawImage: drawImageSpy }; }
-        convertToBlob() { return Promise.resolve(mockBlob); }
-      });
+      vi.stubGlobal(
+        'OffscreenCanvas',
+        class {
+          width: number;
+          height: number;
+          constructor(w: number, h: number) {
+            this.width = w;
+            this.height = h;
+            createdWidth = w;
+            createdHeight = h;
+          }
+          getContext() {
+            return { drawImage: drawImageSpy };
+          }
+          convertToBlob() {
+            return Promise.resolve(mockBlob);
+          }
+        },
+      );
 
-      vi.spyOn(service as any, 'canvasToDataUrl').mockResolvedValue('data:image/png;base64,cropped');
+      // @ts-expect-error accessing private method for test
+      vi.spyOn(service, 'canvasToDataUrl').mockResolvedValue('data:image/png;base64,cropped');
 
       const result = await service.cropImage(sourceDataUrl, rect);
 
       expect(createdWidth).toBe(200);
       expect(createdHeight).toBe(100);
 
-      expect(drawImageSpy).toHaveBeenCalledWith(
-        mockBitmap,
-        20, 40, 200, 100,
-        0, 0, 200, 100,
-      );
+      expect(drawImageSpy).toHaveBeenCalledWith(mockBitmap, 20, 40, 200, 100, 0, 0, 200, 100);
 
       expect(mockBitmap.close).toHaveBeenCalled();
       expect(result).toBe('data:image/png;base64,cropped');

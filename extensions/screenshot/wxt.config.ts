@@ -7,7 +7,15 @@ export default defineConfig({
     name: '__MSG_extName__',
     description: '__MSG_extDescription__',
     default_locale: 'en',
-    permissions: ['activeTab', 'clipboardWrite', 'downloads', 'offscreen', 'scripting', 'debugger', 'storage'],
+    permissions: [
+      'activeTab',
+      'clipboardWrite',
+      'downloads',
+      'offscreen',
+      'scripting',
+      'debugger',
+      'storage',
+    ],
     commands: {
       'capture-screenshot': {
         suggested_key: {

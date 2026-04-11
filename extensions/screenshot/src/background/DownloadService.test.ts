@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mockDownload = vi.fn();
 const mockCreateDocument = vi.fn();
@@ -38,7 +38,9 @@ describe('DownloadService', () => {
   describe('saveAsFile', () => {
     it('正しいファイル名で chrome.downloads.download を呼ぶ', async () => {
       const dataUrl = 'data:image/png;base64,abc123';
-      mockDownload.mockImplementation((_opts: any, cb: any) => cb?.(1));
+      mockDownload.mockImplementation((_opts: unknown, cb: unknown) =>
+        (cb as (id: number) => void)?.(1),
+      );
 
       await service.saveAsFile(dataUrl);
 
@@ -55,7 +57,9 @@ describe('DownloadService', () => {
     it('ファイル名のフォーマットが screenshot_YYYY-MM-DD_HH-MM-SS.png', async () => {
       vi.setSystemTime(new Date('2026-01-05T09:05:03'));
       const dataUrl = 'data:image/png;base64,abc';
-      mockDownload.mockImplementation((_opts: any, cb: any) => cb?.(1));
+      mockDownload.mockImplementation((_opts: unknown, cb: unknown) =>
+        (cb as (id: number) => void)?.(1),
+      );
 
       await service.saveAsFile(dataUrl);
 

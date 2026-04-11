@@ -2,6 +2,14 @@ import type { CropRect } from '../types/messages';
 
 const MAX_FULL_PAGE_HEIGHT = 16384;
 
+interface CDPEvalResult {
+  result: { value: string };
+}
+
+interface CDPScreenshotResult {
+  data: string;
+}
+
 export class CaptureService {
   async captureVisibleArea(): Promise<string> {
     return chrome.tabs.captureVisibleTab(undefined, { format: 'png' });
@@ -15,18 +23,9 @@ export class CaptureService {
     const sh = Math.round(height * dpr);
 
     const canvas = new OffscreenCanvas(sw, sh);
-    const ctx = canvas.getContext('2d')!;
-    ctx.drawImage(
-      bitmap,
-      Math.round(x * dpr),
-      Math.round(y * dpr),
-      sw,
-      sh,
-      0,
-      0,
-      sw,
-      sh,
-    );
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('Failed to get 2d context');
+    ctx.drawImage(bitmap, Math.round(x * dpr), Math.round(y * dpr), sw, sh, 0, 0, sw, sh);
     bitmap.close();
 
     return this.canvasToDataUrl(canvas);
@@ -48,20 +47,20 @@ export class CaptureService {
 
     try {
       // ページ情報を取得
-      const { result: metricsResult } = await chrome.debugger.sendCommand(
-        target,
-        'Runtime.evaluate',
-        {
-          expression: `JSON.stringify({
+      const evalResult = (await chrome.debugger.sendCommand(target, 'Runtime.evaluate', {
+        expression: `JSON.stringify({
             scrollWidth: Math.max(document.documentElement.scrollWidth, document.documentElement.clientWidth),
             scrollHeight: Math.min(document.documentElement.scrollHeight, ${MAX_FULL_PAGE_HEIGHT}),
             viewportHeight: window.innerHeight
           })`,
-          returnByValue: true,
-        },
-      ) as any;
+        returnByValue: true,
+      })) as CDPEvalResult;
 
-      const metrics = JSON.parse(metricsResult.value);
+      const metrics = JSON.parse(evalResult.result.value) as {
+        scrollWidth: number;
+        scrollHeight: number;
+        viewportHeight: number;
+      };
       const { scrollWidth, scrollHeight, viewportHeight } = metrics;
 
       // スクロールをページ先頭に
@@ -71,13 +70,11 @@ export class CaptureService {
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       // 1枚目: 素のビューポートキャプチャ
-      const { data: firstData } = await chrome.debugger.sendCommand(
-        target,
-        'Page.captureScreenshot',
-        { format: 'png' },
-      ) as any;
+      const firstResult = (await chrome.debugger.sendCommand(target, 'Page.captureScreenshot', {
+        format: 'png',
+      })) as CDPScreenshotResult;
 
-      const slices: string[] = [firstData];
+      const slices: string[] = [firstResult.data];
 
       // 2枚目以降: clip で y をずらしてキャプチャ
       const totalSlices = Math.ceil(scrollHeight / viewportHeight);
@@ -88,23 +85,19 @@ export class CaptureService {
         const clipHeight = Math.min(viewportHeight, remaining);
         if (clipHeight <= 0) break;
 
-        const { data } = await chrome.debugger.sendCommand(
-          target,
-          'Page.captureScreenshot',
-          {
-            format: 'png',
-            clip: {
-              x: 0,
-              y,
-              width: scrollWidth,
-              height: clipHeight,
-              scale: 1,
-            },
-            captureBeyondViewport: true,
+        const sliceResult = (await chrome.debugger.sendCommand(target, 'Page.captureScreenshot', {
+          format: 'png',
+          clip: {
+            x: 0,
+            y,
+            width: scrollWidth,
+            height: clipHeight,
+            scale: 1,
           },
-        ) as any;
+          captureBeyondViewport: true,
+        })) as CDPScreenshotResult;
 
-        slices.push(data);
+        slices.push(sliceResult.data);
       }
 
       return { slices, scrollHeight, viewportHeight };

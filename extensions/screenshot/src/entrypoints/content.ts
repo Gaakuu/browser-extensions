@@ -6,9 +6,7 @@ async function copyToClipboard(dataUrl: string): Promise<boolean> {
   try {
     const response = await fetch(dataUrl);
     const blob = await response.blob();
-    await navigator.clipboard.write([
-      new ClipboardItem({ [blob.type]: blob }),
-    ]);
+    await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
     return true;
   } catch {
     return false;
@@ -16,10 +14,7 @@ async function copyToClipboard(dataUrl: string): Promise<boolean> {
 }
 
 /** base64 スライスを Canvas でスティッチ（各画像の実際の高さで配置） */
-async function stitchSlices(
-  slices: string[],
-  scrollHeight: number,
-): Promise<string> {
+async function stitchSlices(slices: string[], scrollHeight: number): Promise<string> {
   const images = await Promise.all(
     slices.map(
       (base64) =>
@@ -38,7 +33,8 @@ async function stitchSlices(
   const canvas = document.createElement('canvas');
   canvas.width = canvasWidth;
   canvas.height = totalHeight;
-  const ctx = canvas.getContext('2d')!;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('Failed to get 2d context');
 
   let dy = 0;
   for (const img of images) {
@@ -68,10 +64,7 @@ export default defineContentScript({
             overlay.showPreview(response.dataUrl, clipboardStatus);
           } else if (response.type === 'CAPTURE_FULL_PAGE_SLICES') {
             try {
-              const dataUrl = await stitchSlices(
-                response.slices,
-                response.scrollHeight,
-              );
+              const dataUrl = await stitchSlices(response.slices, response.scrollHeight);
               const settings = await loadSettings();
               let clipboardStatus: 'success' | 'error' | null = null;
               if (settings.autoCopyToClipboard) {
@@ -95,18 +88,16 @@ export default defineContentScript({
     );
 
     // Background → Content メッセージ受信
-    chrome.runtime.onMessage.addListener(
-      (message: BackgroundMessage, _sender, _sendResponse) => {
-        switch (message.type) {
-          case 'START_CAPTURE':
-            overlay.show();
-            break;
+    chrome.runtime.onMessage.addListener((message: BackgroundMessage, _sender, _sendResponse) => {
+      switch (message.type) {
+        case 'START_CAPTURE':
+          overlay.show();
+          break;
 
-          case 'CAPTURE_PROGRESS':
-            break;
-        }
-      },
-    );
+        case 'CAPTURE_PROGRESS':
+          break;
+      }
+    });
 
     // ページ離脱時にオーバーレイを自動クローズ
     document.addEventListener('visibilitychange', () => {
