@@ -5,6 +5,7 @@ import { TabSwitcher, type TabSwitcherHandle } from './TabSwitcher';
 const createTabs = (count: number) =>
   Array.from({ length: count }, (_, i) => ({
     id: i + 1,
+    windowId: 1,
     title: `Tab ${i + 1}`,
     url: `https://example.com/${i + 1}`,
     favIconUrl: '',

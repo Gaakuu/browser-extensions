@@ -1,4 +1,5 @@
 import { Fzf } from 'fzf';
+import type { TabInfo } from '../types/messages';
 
 export interface MatchRange {
   start: number;
@@ -6,7 +7,7 @@ export interface MatchRange {
 }
 
 export interface FuzzyMatchResult {
-  tab: { id: number; title: string; url: string; favIconUrl: string; lastAccessed: number };
+  tab: TabInfo;
   highlights: MatchRange[];
   highlightField: 'title' | 'url';
   score: number;
@@ -33,10 +34,7 @@ function positionsToRanges(positions: Set<number>): MatchRange[] {
   return ranges;
 }
 
-export function fuzzySearchTabs(
-  query: string,
-  tabs: Array<{ id: number; title: string; url: string; favIconUrl: string; lastAccessed: number }>,
-): FuzzyMatchResult[] {
+export function fuzzySearchTabs(query: string, tabs: TabInfo[]): FuzzyMatchResult[] {
   if (query === '') {
     return tabs.map((tab) => ({ tab, highlights: [], highlightField: 'title' as const, score: 0 }));
   }
