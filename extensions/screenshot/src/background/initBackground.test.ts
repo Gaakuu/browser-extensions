@@ -20,45 +20,53 @@ vi.mock('./DownloadService', () => ({
   },
 }));
 
-// Chrome API をグローバルに設定
-let commandListener: (command: string) => void;
-let messageListener: (
+import { initBackground } from './initBackground';
+
+type CommandListener = (command: string) => void | Promise<void>;
+type MessageListener = (
   message: unknown,
   sender: unknown,
   sendResponse: (response?: unknown) => void,
-) => boolean | void;
+) => boolean | undefined;
+
 const mockTabsSendMessage = vi.fn();
 const mockTabsQuery = vi.fn();
 
-(globalThis as unknown as { chrome: unknown }).chrome = {
-  commands: {
-    onCommand: {
-      addListener: (cb: typeof commandListener) => {
-        commandListener = cb;
+let commandListener: CommandListener;
+let messageListener: MessageListener;
+
+function setupChromeStubs() {
+  commandListener = (() => {}) as CommandListener;
+  messageListener = (() => {}) as MessageListener;
+
+  vi.stubGlobal('chrome', {
+    commands: {
+      onCommand: {
+        addListener: (cb: CommandListener) => {
+          commandListener = cb;
+        },
       },
     },
-  },
-  runtime: {
-    onMessage: {
-      addListener: (cb: typeof messageListener) => {
-        messageListener = cb;
+    runtime: {
+      onMessage: {
+        addListener: (cb: MessageListener) => {
+          messageListener = cb;
+        },
       },
     },
-  },
-  tabs: {
-    query: (...args: unknown[]) => mockTabsQuery(...args),
-    sendMessage: (...args: unknown[]) => mockTabsSendMessage(...args),
-  },
-};
-
-import { initBackground } from './initBackground';
-
-initBackground();
+    tabs: {
+      query: (...args: unknown[]) => mockTabsQuery(...args),
+      sendMessage: (...args: unknown[]) => mockTabsSendMessage(...args),
+    },
+  });
+}
 
 describe('background entrypoint', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    setupChromeStubs();
     mockTabsQuery.mockResolvedValue([{ id: 1 }]);
+    initBackground();
   });
 
   describe('chrome.commands.onCommand', () => {

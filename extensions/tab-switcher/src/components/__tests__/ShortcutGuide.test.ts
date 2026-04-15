@@ -26,6 +26,18 @@ describe('getDevtoolsConsoleCode', () => {
     // 1エントリなので改行区切りが含まれない
     expect(code).not.toContain('\n\n');
   });
+
+  it('生成されたコードは構文エラーなく parse できる', () => {
+    const code = getDevtoolsConsoleCode('test-id', OVERRIDE_ENTRIES);
+    // new Function でパースのみ行う（実行はしない）
+    expect(() => new Function(code)).not.toThrow();
+  });
+
+  it('特殊文字を含む extensionId でも構文エラーにならない', () => {
+    // 実際の Chrome 拡張 ID は a-p の英小文字のみだが、念のため英数字パターン
+    const code = getDevtoolsConsoleCode('abcdefghijklmnopabcdefghijklmnop', OVERRIDE_ENTRIES);
+    expect(() => new Function(code)).not.toThrow();
+  });
 });
 
 describe('OVERRIDE_ENTRIES', () => {
