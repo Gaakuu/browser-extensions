@@ -306,11 +306,7 @@ describe('registerBackground', () => {
 
     it('GET_ALL_TABS で sender のウィンドウのタブのみ sendResponse で返す', () => {
       const sendResponse = vi.fn();
-      messageListener(
-        { type: 'GET_ALL_TABS' },
-        { tab: { windowId: 100 } },
-        sendResponse,
-      );
+      messageListener({ type: 'GET_ALL_TABS' }, { tab: { windowId: 100 } }, sendResponse);
 
       expect(sendResponse).toHaveBeenCalledTimes(1);
       const response = sendResponse.mock.calls[0][0];
@@ -319,11 +315,7 @@ describe('registerBackground', () => {
     });
 
     it('onMessage リスナーは true を返す（非同期 sendResponse 用）', () => {
-      const result = messageListener(
-        { type: 'GET_ALL_TABS' },
-        { tab: { windowId: 100 } },
-        vi.fn(),
-      );
+      const result = messageListener({ type: 'GET_ALL_TABS' }, { tab: { windowId: 100 } }, vi.fn());
       expect(result).toBe(true);
     });
   });
