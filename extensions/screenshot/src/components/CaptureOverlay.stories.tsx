@@ -46,6 +46,11 @@ export const CropSelection: Story = {
     const canvas = within(canvasElement);
     expect(canvas.getByTestId('crop-area')).toBeInTheDocument();
     expect(canvas.getByText('400 × 250')).toBeInTheDocument();
+
+    // crop モードではドラッグ追従のため clip-path の transition は無効
+    const overlay = canvas.getByTestId('capture-overlay');
+    const mask = overlay.firstElementChild as HTMLElement;
+    expect(mask.style.transition).toBe('none');
   },
 };
 
