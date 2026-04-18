@@ -54,6 +54,8 @@ export class OverlayManager {
     }
     this.state = null;
     this.switcherHandle = null;
+    // React ツリーを unmount し、子コンポーネントが登録した window イベントリスナーを解除する
+    this.root?.render(null);
   }
 
   isVisible(): boolean {
