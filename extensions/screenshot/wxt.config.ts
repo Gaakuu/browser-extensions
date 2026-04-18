@@ -3,6 +3,11 @@ import { defineConfig } from 'wxt';
 export default defineConfig({
   srcDir: 'src',
   modules: ['@wxt-dev/module-react'],
+  imports: {
+    dirsScanOptions: {
+      fileFilter: (file) => !/\.(stories|test|spec)\.(ts|tsx)$/.test(file),
+    },
+  },
   runner: {
     chromiumArgs: ['--disable-blink-features=AutomationControlled'],
   },
