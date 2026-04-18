@@ -41,7 +41,7 @@ export function CaptureOverlay({ mode, highlightRect, cropRect }: CaptureOverlay
           inset: 0,
           backgroundColor: 'rgba(0, 0, 0, 0.5)',
           clipPath,
-          transition: 'clip-path 0.15s ease',
+          transition: mode === 'element' ? 'clip-path 0.15s ease' : 'none',
         }}
       />
 
