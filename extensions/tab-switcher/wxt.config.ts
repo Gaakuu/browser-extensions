@@ -3,6 +3,9 @@ import { defineConfig } from 'wxt';
 export default defineConfig({
   srcDir: 'src',
   modules: ['@wxt-dev/module-react'],
+  runner: {
+    chromiumArgs: ['--disable-blink-features=AutomationControlled'],
+  },
   manifest: {
     name: '__MSG_extName__',
     description: '__MSG_extDescription__',
