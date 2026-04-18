@@ -258,16 +258,6 @@ export class OverlayManager {
     document.addEventListener('keydown', blockKeyEvent, true);
     document.addEventListener('keyup', blockKeyEvent, true);
 
-    // プレビューモード時のみスクロール防止（要素選択・トリミング中はスクロール許可）
-    document.addEventListener(
-      'wheel',
-      (e) => {
-        if (!this.isVisible() || this.state.mode !== 'preview') return;
-        e.preventDefault();
-      },
-      { passive: false },
-    );
-
     document.body.appendChild(this.host);
   }
 
