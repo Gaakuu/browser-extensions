@@ -1,37 +1,19 @@
 const MODIFIER_KEYS = new Set(['Meta', 'Control', 'Shift']);
 
 export class KeyboardHandler {
-  private modifiersPressed = new Set<string>();
   private callback: (() => void) | null = null;
-  private handleKeyDown: (e: KeyboardEvent) => void;
   private handleKeyUp: (e: KeyboardEvent) => void;
 
-  constructor(assumeModifiersHeld = false) {
-    // ショートカットで起動された場合、修飾キーは既に押されている
-    if (assumeModifiersHeld) {
-      this.modifiersPressed.add('Meta');
-      this.modifiersPressed.add('Shift');
-    }
-
-    this.handleKeyDown = (e: KeyboardEvent) => {
-      if (MODIFIER_KEYS.has(e.key)) {
-        this.modifiersPressed.add(e.key);
-      }
-    };
-
+  constructor() {
     this.handleKeyUp = (e: KeyboardEvent) => {
-      if (MODIFIER_KEYS.has(e.key) && this.modifiersPressed.size > 0) {
-        const wasModifierHeld =
-          this.modifiersPressed.has('Meta') || this.modifiersPressed.has('Control');
-        this.modifiersPressed.delete(e.key);
-
-        if (wasModifierHeld && this.callback) {
-          this.callback();
-        }
+      if (!MODIFIER_KEYS.has(e.key)) return;
+      // keyup イベントの metaKey/ctrlKey/shiftKey は離された後の押下状態を表す
+      const allReleased = !e.metaKey && !e.ctrlKey && !e.shiftKey;
+      if (allReleased && this.callback) {
+        this.callback();
       }
     };
 
-    window.addEventListener('keydown', this.handleKeyDown, true);
     window.addEventListener('keyup', this.handleKeyUp, true);
   }
 
@@ -40,9 +22,7 @@ export class KeyboardHandler {
   }
 
   destroy(): void {
-    window.removeEventListener('keydown', this.handleKeyDown, true);
     window.removeEventListener('keyup', this.handleKeyUp, true);
     this.callback = null;
-    this.modifiersPressed.clear();
   }
 }
