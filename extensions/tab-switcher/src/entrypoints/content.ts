@@ -42,8 +42,8 @@ export default defineContentScript({
       if (message.type === 'SHOW_SWITCHER') {
         overlay.show('switcher', message.tabs);
 
-        // キー押し続けモード: 修飾キーを離したら確定
-        keyboardHandler = new KeyboardHandler(true);
+        // キー押し続けモード: 修飾キーをすべて離したら確定
+        keyboardHandler = new KeyboardHandler();
         keyboardHandler.onModifierRelease(() => {
           if (overlay.isVisible()) {
             overlay.confirmSelection();
