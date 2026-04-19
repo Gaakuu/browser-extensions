@@ -5,17 +5,25 @@ import { TabHistoryManager } from './TabHistoryManager';
 const mockTabs = [
   {
     id: 1,
+    windowId: 100,
     title: 'Gmail',
     url: 'https://mail.google.com',
     favIconUrl: 'https://mail.google.com/favicon.ico',
   },
   {
     id: 2,
+    windowId: 100,
     title: 'GitHub',
     url: 'https://github.com',
     favIconUrl: 'https://github.com/favicon.ico',
   },
-  { id: 3, title: 'Slack', url: 'https://slack.com', favIconUrl: 'https://slack.com/favicon.ico' },
+  {
+    id: 3,
+    windowId: 200,
+    title: 'Slack',
+    url: 'https://slack.com',
+    favIconUrl: 'https://slack.com/favicon.ico',
+  },
 ];
 
 vi.stubGlobal('chrome', {
@@ -45,6 +53,13 @@ describe('TabHistoryManager', () => {
       const tabs = manager.getAllTabs();
       expect(tabs).toHaveLength(3);
     });
+
+    it('各タブに windowId が保持される', () => {
+      const tabs = manager.getAllTabs();
+      expect(tabs.find((t) => t.id === 1)?.windowId).toBe(100);
+      expect(tabs.find((t) => t.id === 2)?.windowId).toBe(100);
+      expect(tabs.find((t) => t.id === 3)?.windowId).toBe(200);
+    });
   });
 
   describe('onTabActivated', () => {
@@ -73,6 +88,23 @@ describe('TabHistoryManager', () => {
       const tabs = manager.getRecentTabs(2);
       expect(tabs).toHaveLength(2);
     });
+
+    it('windowId を指定すると該当ウィンドウのタブのみ返す', () => {
+      const tabs = manager.getRecentTabs(undefined, 100);
+      expect(tabs).toHaveLength(2);
+      expect(tabs.every((t) => t.windowId === 100)).toBe(true);
+    });
+
+    it('windowId と limit を組み合わせられる', () => {
+      const tabs = manager.getRecentTabs(1, 100);
+      expect(tabs).toHaveLength(1);
+      expect(tabs[0].windowId).toBe(100);
+    });
+
+    it('windowId に該当するタブが無ければ空配列を返す', () => {
+      const tabs = manager.getRecentTabs(undefined, 999);
+      expect(tabs).toEqual([]);
+    });
   });
 
   describe('getAllTabs', () => {
@@ -89,6 +121,12 @@ describe('TabHistoryManager', () => {
       expect(tabs[1].id).toBe(3);
       expect(tabs[2].id).toBe(2);
     });
+
+    it('windowId を指定すると該当ウィンドウのタブのみ返す', () => {
+      const tabs = manager.getAllTabs(100);
+      expect(tabs).toHaveLength(2);
+      expect(tabs.map((t) => t.id).sort()).toEqual([1, 2]);
+    });
   });
 
   describe('onTabRemoved', () => {
@@ -104,6 +142,7 @@ describe('TabHistoryManager', () => {
     it('メタデータが更新される', () => {
       manager.onTabUpdated(
         1,
+        100,
         'Gmail - Inbox (3)',
         'https://mail.google.com/inbox',
         'https://mail.google.com/favicon.ico',
@@ -120,7 +159,7 @@ describe('TabHistoryManager', () => {
       manager.onTabActivated(2);
 
       const beforeOrder = manager.getAllTabs().map((t) => t.id);
-      manager.onTabUpdated(1, 'Updated', 'https://updated.com', '');
+      manager.onTabUpdated(1, 100, 'Updated', 'https://updated.com', '');
       const afterOrder = manager.getAllTabs().map((t) => t.id);
 
       expect(afterOrder).toEqual(beforeOrder);
@@ -129,6 +168,7 @@ describe('TabHistoryManager', () => {
     it('未知のタブIDで呼ばれた場合、新規タブとして追加される', () => {
       manager.onTabUpdated(
         99,
+        300,
         'New Tab',
         'https://new.example.com',
         'https://new.example.com/favicon.ico',
@@ -139,6 +179,19 @@ describe('TabHistoryManager', () => {
       expect(newTab).toBeDefined();
       expect(newTab?.title).toBe('New Tab');
       expect(newTab?.url).toBe('https://new.example.com');
+      expect(newTab?.windowId).toBe(300);
+    });
+
+    it('タブがウィンドウ間で移動したときに windowId が更新される', () => {
+      manager.onTabUpdated(
+        1,
+        200,
+        'Gmail',
+        'https://mail.google.com',
+        'https://mail.google.com/favicon.ico',
+      );
+      const tab = manager.getAllTabs().find((t) => t.id === 1);
+      expect(tab?.windowId).toBe(200);
     });
   });
 });

@@ -19,9 +19,10 @@ type TabUpdatedListener = (
 type InstalledListener = (details: { reason: string }) => void;
 
 const INITIAL_TABS = [
-  { id: 1, title: 'Gmail', url: 'https://mail.google.com', favIconUrl: '' },
-  { id: 2, title: 'GitHub', url: 'https://github.com', favIconUrl: '' },
-  { id: 3, title: 'Slack', url: 'https://slack.com', favIconUrl: '' },
+  { id: 1, windowId: 100, title: 'Gmail', url: 'https://mail.google.com', favIconUrl: '' },
+  { id: 2, windowId: 100, title: 'GitHub', url: 'https://github.com', favIconUrl: '' },
+  { id: 3, windowId: 100, title: 'Slack', url: 'https://slack.com', favIconUrl: '' },
+  { id: 4, windowId: 200, title: 'Other', url: 'https://other.example.com', favIconUrl: '' },
 ];
 
 describe('registerBackground', () => {
@@ -40,17 +41,21 @@ describe('registerBackground', () => {
   const mockTabsRemove = vi.fn();
   const mockOpenOptionsPage = vi.fn();
 
-  // アクティブタブの ID を変更可能にする
+  // アクティブタブの ID / ウィンドウを変更可能にする
   let activeTabId: number | undefined = 1;
+  let activeWindowId: number | undefined = 100;
 
   beforeEach(async () => {
     vi.clearAllMocks();
     vi.useFakeTimers();
     activeTabId = 1;
+    activeWindowId = 100;
 
     mockTabsQuery.mockImplementation((query: { active?: boolean }) => {
       if (query.active) {
-        return Promise.resolve(activeTabId != null ? [{ id: activeTabId }] : []);
+        return Promise.resolve(
+          activeTabId != null ? [{ id: activeTabId, windowId: activeWindowId }] : [],
+        );
       }
       return Promise.resolve(INITIAL_TABS);
     });
@@ -127,6 +132,29 @@ describe('registerBackground', () => {
       expect(messageArg.tabs).toHaveLength(3);
     });
 
+    it('現在のウィンドウのタブのみを送信する（別ウィンドウのタブは除外）', async () => {
+      mockTabsSendMessage.mockResolvedValue(undefined);
+
+      await commandListener('show-tab-switcher');
+
+      const [, messageArg] = mockTabsSendMessage.mock.calls[0];
+      const sentTabIds = messageArg.tabs.map((t: { id: number }) => t.id).sort();
+      expect(sentTabIds).toEqual([1, 2, 3]);
+      expect(sentTabIds).not.toContain(4);
+    });
+
+    it('アクティブウィンドウが切り替わると該当ウィンドウのタブを送る', async () => {
+      mockTabsSendMessage.mockResolvedValue(undefined);
+
+      activeTabId = 4;
+      activeWindowId = 200;
+      await commandListener('show-tab-switcher');
+
+      const [tabIdArg, messageArg] = mockTabsSendMessage.mock.calls[0];
+      expect(tabIdArg).toBe(4);
+      expect(messageArg.tabs.map((t: { id: number }) => t.id)).toEqual([4]);
+    });
+
     it('同一タブで2回目の呼び出しは MOVE_FOCUS_DOWN を送信する', async () => {
       mockTabsSendMessage.mockResolvedValue(undefined);
 
@@ -159,20 +187,21 @@ describe('registerBackground', () => {
 
       await commandListener('show-tab-switcher');
 
-      // INITIAL_TABS は同時刻なので getRecentTabs(2) は [tab1, tab2]、
+      // INITIAL_TABS は同時刻なので window100 内 MRU は [tab1, tab2, tab3]、
       // active は tab1 なので previousTab = tab2 → tab2 をアクティブ化
       expect(mockTabsUpdate).toHaveBeenCalledWith(2, { active: true });
     });
 
-    it('フォールバック時に該当タブが無ければ何もしない', async () => {
+    it('フォールバック時に同一ウィンドウの他タブが無ければ何もしない', async () => {
       mockTabsSendMessage.mockRejectedValue(new Error('No content script'));
 
-      // tab 2 と 3 を削除して履歴を tab1 のみにする
+      // window100 から tab2, tab3 を削除して履歴を tab1 のみにする
       tabRemovedListener(2);
       tabRemovedListener(3);
 
       await commandListener('show-tab-switcher');
 
+      // 別ウィンドウの tab4 にはフォールバックしない
       expect(mockTabsUpdate).not.toHaveBeenCalled();
     });
 
@@ -200,7 +229,7 @@ describe('registerBackground', () => {
   });
 
   describe('search-tabs コマンド', () => {
-    it('アクティブタブに SHOW_SEARCH と全タブを送信する', async () => {
+    it('アクティブタブに SHOW_SEARCH と現在のウィンドウのタブを送信する', async () => {
       mockTabsSendMessage.mockResolvedValue(undefined);
 
       await commandListener('search-tabs');
@@ -210,6 +239,7 @@ describe('registerBackground', () => {
       expect(tabIdArg).toBe(1);
       expect(messageArg.type).toBe('SHOW_SEARCH');
       expect(messageArg.tabs).toHaveLength(3);
+      expect(messageArg.tabs.every((t: { id: number }) => t.id !== 4)).toBe(true);
     });
 
     it('sendMessage 失敗時にエラーを投げない', async () => {
@@ -274,17 +304,18 @@ describe('registerBackground', () => {
       expect(mockTabsSendMessage.mock.calls[0][1].type).toBe('SHOW_SWITCHER');
     });
 
-    it('GET_ALL_TABS で全タブを sendResponse で返す', () => {
+    it('GET_ALL_TABS で sender のウィンドウのタブのみ sendResponse で返す', () => {
       const sendResponse = vi.fn();
-      messageListener({ type: 'GET_ALL_TABS' }, {}, sendResponse);
+      messageListener({ type: 'GET_ALL_TABS' }, { tab: { windowId: 100 } }, sendResponse);
 
       expect(sendResponse).toHaveBeenCalledTimes(1);
       const response = sendResponse.mock.calls[0][0];
       expect(response.tabs).toHaveLength(3);
+      expect(response.tabs.every((t: { id: number }) => t.id !== 4)).toBe(true);
     });
 
     it('onMessage リスナーは true を返す（非同期 sendResponse 用）', () => {
-      const result = messageListener({ type: 'GET_ALL_TABS' }, {}, vi.fn());
+      const result = messageListener({ type: 'GET_ALL_TABS' }, { tab: { windowId: 100 } }, vi.fn());
       expect(result).toBe(true);
     });
   });
@@ -302,33 +333,36 @@ describe('registerBackground', () => {
       vi.advanceTimersByTime(100);
       tabCreatedListener({
         id: 99,
+        windowId: 100,
         title: 'New Tab',
         url: 'https://new.example.com',
         favIconUrl: '',
       } as chrome.tabs.Tab);
 
       const tabs = manager.getAllTabs();
-      expect(tabs).toHaveLength(4);
+      expect(tabs).toHaveLength(5);
       expect(tabs[0].id).toBe(99);
+      expect(tabs[0].windowId).toBe(100);
     });
 
     it('onCreated で id が無いタブは無視される', () => {
       tabCreatedListener({ title: 'No Id' } as chrome.tabs.Tab);
 
-      expect(manager.getAllTabs()).toHaveLength(3);
+      expect(manager.getAllTabs()).toHaveLength(4);
     });
 
     it('onRemoved で manager から削除される', () => {
       tabRemovedListener(2);
 
       const tabs = manager.getAllTabs();
-      expect(tabs).toHaveLength(2);
+      expect(tabs).toHaveLength(3);
       expect(tabs.find((t) => t.id === 2)).toBeUndefined();
     });
 
     it('onUpdated で title/url が更新される', () => {
       tabUpdatedListener(1, { title: 'Updated' }, {
         id: 1,
+        windowId: 100,
         title: 'Gmail Updated',
         url: 'https://mail.google.com/inbox',
         favIconUrl: '',
@@ -344,6 +378,7 @@ describe('registerBackground', () => {
 
       tabUpdatedListener(1, { status: 'loading' }, {
         id: 1,
+        windowId: 100,
         title: '',
         url: '',
       } as chrome.tabs.Tab);

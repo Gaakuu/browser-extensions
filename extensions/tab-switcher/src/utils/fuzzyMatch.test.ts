@@ -47,6 +47,7 @@ describe('fuzzySearchTabs', () => {
   const sampleTabs = [
     {
       id: 1,
+      windowId: 1,
       title: 'Gmail - Inbox',
       url: 'https://mail.google.com',
       favIconUrl: '',
@@ -54,6 +55,7 @@ describe('fuzzySearchTabs', () => {
     },
     {
       id: 2,
+      windowId: 1,
       title: 'GitHub - Pull Requests',
       url: 'https://github.com/pulls',
       favIconUrl: '',
@@ -61,6 +63,7 @@ describe('fuzzySearchTabs', () => {
     },
     {
       id: 3,
+      windowId: 1,
       title: 'Google Search',
       url: 'https://www.google.com/search?q=test',
       favIconUrl: '',

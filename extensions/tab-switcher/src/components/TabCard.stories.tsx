@@ -4,6 +4,7 @@ import { TabCard } from './TabCard';
 
 const sampleTab = {
   id: 1,
+  windowId: 1,
   title: 'Gmail - Inbox',
   url: 'https://mail.google.com/mail/u/0/#inbox',
   favIconUrl: 'https://mail.google.com/favicon.ico',

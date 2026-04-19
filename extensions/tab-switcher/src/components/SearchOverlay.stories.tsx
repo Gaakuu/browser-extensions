@@ -3,11 +3,11 @@ import { expect, fn, userEvent, within } from 'storybook/test';
 import { SearchOverlay } from './SearchOverlay';
 
 const sampleTabs = [
-  { id: 1, title: 'Gmail - Inbox', url: 'https://mail.google.com', favIconUrl: '', lastAccessed: Date.now() },
-  { id: 2, title: 'GitHub - Pull Requests', url: 'https://github.com/pulls', favIconUrl: '', lastAccessed: Date.now() - 1000 },
-  { id: 3, title: 'Slack - General', url: 'https://app.slack.com', favIconUrl: '', lastAccessed: Date.now() - 2000 },
-  { id: 4, title: 'Notion - Workspace', url: 'https://notion.so', favIconUrl: '', lastAccessed: Date.now() - 3000 },
-  { id: 5, title: 'YouTube', url: 'https://youtube.com', favIconUrl: '', lastAccessed: Date.now() - 4000 },
+  { id: 1, windowId: 1, title: 'Gmail - Inbox', url: 'https://mail.google.com', favIconUrl: '', lastAccessed: Date.now() },
+  { id: 2, windowId: 1, title: 'GitHub - Pull Requests', url: 'https://github.com/pulls', favIconUrl: '', lastAccessed: Date.now() - 1000 },
+  { id: 3, windowId: 1, title: 'Slack - General', url: 'https://app.slack.com', favIconUrl: '', lastAccessed: Date.now() - 2000 },
+  { id: 4, windowId: 1, title: 'Notion - Workspace', url: 'https://notion.so', favIconUrl: '', lastAccessed: Date.now() - 3000 },
+  { id: 5, windowId: 1, title: 'YouTube', url: 'https://youtube.com', favIconUrl: '', lastAccessed: Date.now() - 4000 },
 ];
 
 const meta: Meta<typeof SearchOverlay> = {
