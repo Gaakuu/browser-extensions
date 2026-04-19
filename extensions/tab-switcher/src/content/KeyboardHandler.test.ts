@@ -78,9 +78,7 @@ describe('KeyboardHandler', () => {
     handler.onModifierRelease(callback);
 
     // Cmd+Shift+Space 押下中に Space だけ離す
-    window.dispatchEvent(
-      new KeyboardEvent('keyup', { key: ' ', metaKey: true, shiftKey: true }),
-    );
+    window.dispatchEvent(new KeyboardEvent('keyup', { key: ' ', metaKey: true, shiftKey: true }));
 
     expect(callback).not.toHaveBeenCalled();
   });
