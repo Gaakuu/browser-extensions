@@ -15,7 +15,8 @@ export default defineConfig({
     name: '__MSG_extName__',
     description: '__MSG_extDescription__',
     default_locale: 'en',
-    permissions: ['tabs'],
+    permissions: ['tabs', 'scripting'],
+    host_permissions: ['<all_urls>'],
     commands: {
       'show-tab-switcher': {
         suggested_key: {

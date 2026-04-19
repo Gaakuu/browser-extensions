@@ -40,6 +40,7 @@ describe('registerBackground', () => {
   const mockTabsUpdate = vi.fn();
   const mockTabsRemove = vi.fn();
   const mockOpenOptionsPage = vi.fn();
+  const mockScriptingExecuteScript = vi.fn();
 
   // アクティブタブの ID / ウィンドウを変更可能にする
   let activeTabId: number | undefined = 1;
@@ -106,6 +107,9 @@ describe('registerBackground', () => {
             commandListener = cb;
           },
         },
+      },
+      scripting: {
+        executeScript: mockScriptingExecuteScript,
       },
     });
 
@@ -182,26 +186,48 @@ describe('registerBackground', () => {
       expect(messageArg.type).toBe('SHOW_SWITCHER');
     });
 
-    it('Content Script が無いページではフォールバックで前タブに切り替える', async () => {
-      mockTabsSendMessage.mockRejectedValue(new Error('Receiving end does not exist'));
+    it('Content Script 未注入のタブでは executeScript で動的注入し再送信する', async () => {
+      // 1回目は Content Script 不在で失敗、注入後の2回目は成功
+      mockTabsSendMessage
+        .mockRejectedValueOnce(new Error('Receiving end does not exist'))
+        .mockResolvedValueOnce(undefined);
+      mockScriptingExecuteScript.mockResolvedValue([]);
 
       await commandListener('show-tab-switcher');
 
-      // INITIAL_TABS は同時刻なので window100 内 MRU は [tab1, tab2, tab3]、
-      // active は tab1 なので previousTab = tab2 → tab2 をアクティブ化
-      expect(mockTabsUpdate).toHaveBeenCalledWith(2, { active: true });
+      expect(mockScriptingExecuteScript).toHaveBeenCalledWith({
+        target: { tabId: 1 },
+        files: ['content-scripts/content.js'],
+      });
+      expect(mockTabsSendMessage).toHaveBeenCalledTimes(2);
+      const [, secondMessage] = mockTabsSendMessage.mock.calls[1];
+      expect(secondMessage.type).toBe('SHOW_SWITCHER');
+      // 旧仕様の「前タブに切り替える」フォールバックは行わない
+      expect(mockTabsUpdate).not.toHaveBeenCalled();
     });
 
-    it('フォールバック時に同一ウィンドウの他タブが無ければ何もしない', async () => {
-      mockTabsSendMessage.mockRejectedValue(new Error('No content script'));
+    it('注入後の再送信が成功すると switcherVisibleTabId が記録され次回は MOVE_FOCUS_DOWN', async () => {
+      mockTabsSendMessage
+        .mockRejectedValueOnce(new Error('Receiving end does not exist'))
+        .mockResolvedValueOnce(undefined);
+      mockScriptingExecuteScript.mockResolvedValue([]);
 
-      // window100 から tab2, tab3 を削除して履歴を tab1 のみにする
-      tabRemovedListener(2);
-      tabRemovedListener(3);
+      await commandListener('show-tab-switcher');
+      mockTabsSendMessage.mockClear();
+      mockTabsSendMessage.mockResolvedValue(undefined);
 
       await commandListener('show-tab-switcher');
 
-      // 別ウィンドウの tab4 にはフォールバックしない
+      expect(mockTabsSendMessage).toHaveBeenCalledTimes(1);
+      expect(mockTabsSendMessage).toHaveBeenCalledWith(1, { type: 'MOVE_FOCUS_DOWN' });
+    });
+
+    it('executeScript が失敗する制限ページでは何もしない（前タブにも切り替えない）', async () => {
+      mockTabsSendMessage.mockRejectedValue(new Error('Receiving end does not exist'));
+      mockScriptingExecuteScript.mockRejectedValue(new Error('Cannot access chrome:// URL'));
+
+      await commandListener('show-tab-switcher');
+
       expect(mockTabsUpdate).not.toHaveBeenCalled();
     });
 
@@ -211,15 +237,18 @@ describe('registerBackground', () => {
       await commandListener('show-tab-switcher');
 
       expect(mockTabsSendMessage).not.toHaveBeenCalled();
+      expect(mockScriptingExecuteScript).not.toHaveBeenCalled();
       expect(mockTabsUpdate).not.toHaveBeenCalled();
     });
 
-    it('sendMessage 失敗後は switcherVisibleTabId が記録されないので次回も SHOW_SWITCHER', async () => {
-      mockTabsSendMessage.mockRejectedValueOnce(new Error('fail'));
+    it('注入も失敗した場合は switcherVisibleTabId が記録されないので次回も SHOW_SWITCHER', async () => {
+      mockTabsSendMessage.mockRejectedValue(new Error('fail'));
+      mockScriptingExecuteScript.mockRejectedValue(new Error('Cannot access'));
+
       await commandListener('show-tab-switcher');
 
+      mockTabsSendMessage.mockReset();
       mockTabsSendMessage.mockResolvedValue(undefined);
-      mockTabsSendMessage.mockClear();
 
       await commandListener('show-tab-switcher');
 
@@ -242,8 +271,26 @@ describe('registerBackground', () => {
       expect(messageArg.tabs.every((t: { id: number }) => t.id !== 4)).toBe(true);
     });
 
-    it('sendMessage 失敗時にエラーを投げない', async () => {
+    it('Content Script 未注入のタブでは executeScript で動的注入し再送信する', async () => {
+      mockTabsSendMessage
+        .mockRejectedValueOnce(new Error('No content script'))
+        .mockResolvedValueOnce(undefined);
+      mockScriptingExecuteScript.mockResolvedValue([]);
+
+      await commandListener('search-tabs');
+
+      expect(mockScriptingExecuteScript).toHaveBeenCalledWith({
+        target: { tabId: 1 },
+        files: ['content-scripts/content.js'],
+      });
+      expect(mockTabsSendMessage).toHaveBeenCalledTimes(2);
+      const [, secondMessage] = mockTabsSendMessage.mock.calls[1];
+      expect(secondMessage.type).toBe('SHOW_SEARCH');
+    });
+
+    it('executeScript も失敗した場合はエラーを投げず終了する', async () => {
       mockTabsSendMessage.mockRejectedValue(new Error('No content script'));
+      mockScriptingExecuteScript.mockRejectedValue(new Error('Cannot access'));
 
       await expect(commandListener('search-tabs')).resolves.not.toThrow();
     });

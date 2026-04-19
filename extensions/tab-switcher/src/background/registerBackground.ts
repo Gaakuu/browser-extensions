@@ -1,5 +1,24 @@
-import type { ContentMessage } from '../types/messages';
+import type { BackgroundMessage, ContentMessage } from '../types/messages';
 import type { TabHistoryManager } from './TabHistoryManager';
+
+async function sendOrInject(tabId: number, message: BackgroundMessage): Promise<boolean> {
+  try {
+    await chrome.tabs.sendMessage(tabId, message);
+    return true;
+  } catch {
+    try {
+      await chrome.scripting.executeScript({
+        target: { tabId },
+        files: ['content-scripts/content.js'],
+      });
+      await chrome.tabs.sendMessage(tabId, message);
+      return true;
+    } catch {
+      console.log('[Tab Switcher] Content Script unavailable on this page');
+      return false;
+    }
+  }
+}
 
 export function registerBackground(manager: TabHistoryManager): void {
   let switcherVisibleTabId: number | null = null;
@@ -60,25 +79,14 @@ export function registerBackground(manager: TabHistoryManager): void {
 
       const tabs = manager.getRecentTabs(undefined, activeWindowId);
       console.log('[Tab Switcher] SHOW_SWITCHER, tabs:', tabs.length);
-      try {
-        await chrome.tabs.sendMessage(activeTab.id, { type: 'SHOW_SWITCHER', tabs });
+      const ok = await sendOrInject(activeTab.id, { type: 'SHOW_SWITCHER', tabs });
+      if (ok) {
         switcherVisibleTabId = activeTab.id;
-      } catch {
-        console.log('[Tab Switcher] Fallback: Content Script not available');
-        const recentTabs = manager.getRecentTabs(2, activeWindowId);
-        const previousTab = recentTabs.find((t) => t.id !== activeTab.id);
-        if (previousTab) {
-          chrome.tabs.update(previousTab.id, { active: true });
-        }
       }
     } else if (command === 'search-tabs') {
       const tabs = manager.getAllTabs(activeWindowId);
       console.log('[Tab Switcher] SHOW_SEARCH, tabs:', tabs.length);
-      try {
-        await chrome.tabs.sendMessage(activeTab.id, { type: 'SHOW_SEARCH', tabs });
-      } catch {
-        console.log('[Tab Switcher] Fallback: Content Script not available');
-      }
+      await sendOrInject(activeTab.id, { type: 'SHOW_SEARCH', tabs });
     }
   });
 
