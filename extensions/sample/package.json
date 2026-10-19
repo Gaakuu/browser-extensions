@@ -13,5 +13,8 @@
   },
   "devDependencies": {
     "wxt": "~0.19.29"
+  },
+  "volta": {
+    "extends": "../../package.json"
   }
 }

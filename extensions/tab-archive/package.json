@@ -26,5 +26,8 @@
     "@testing-library/user-event": "^14.6.1",
     "@wxt-dev/module-react": "~1.1.5",
     "wxt": "~0.19.29"
+  },
+  "volta": {
+    "extends": "../../package.json"
   }
 }
