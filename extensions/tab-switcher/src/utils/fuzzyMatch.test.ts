@@ -48,6 +48,7 @@ describe('fuzzySearchTabs', () => {
     {
       id: 1,
       windowId: 1,
+      index: 0,
       title: 'Gmail - Inbox',
       url: 'https://mail.google.com',
       favIconUrl: '',
@@ -56,6 +57,7 @@ describe('fuzzySearchTabs', () => {
     {
       id: 2,
       windowId: 1,
+      index: 0,
       title: 'GitHub - Pull Requests',
       url: 'https://github.com/pulls',
       favIconUrl: '',
@@ -64,6 +66,7 @@ describe('fuzzySearchTabs', () => {
     {
       id: 3,
       windowId: 1,
+      index: 0,
       title: 'Google Search',
       url: 'https://www.google.com/search?q=test',
       favIconUrl: '',
@@ -101,5 +104,24 @@ describe('fuzzySearchTabs', () => {
     const github = results.find((r) => r.tab.id === 2);
     expect(github).toBeDefined();
     expect(github?.highlights.length).toBeGreaterThan(0);
+  });
+});
+
+describe('fuzzySearchTabs（組み込みページ）', () => {
+  it('chrome:// の URL でも当たる', () => {
+    const tabs = [
+      {
+        id: 1,
+        windowId: 1,
+        index: 0,
+        title: '設定',
+        url: 'chrome://settings/privacy',
+        favIconUrl: '',
+      },
+    ];
+    const [result] = fuzzySearchTabs('settings', tabs);
+    expect(result?.tab.id).toBe(1);
+    expect(result?.highlightField).toBe('url');
+    expect(result?.highlights).toEqual([{ start: 9, end: 17 }]);
   });
 });

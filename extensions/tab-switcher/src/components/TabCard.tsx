@@ -1,7 +1,6 @@
 import CloseIcon from '@mui/icons-material/Close';
 import { Avatar, IconButton, ListItemAvatar, ListItemButton, ListItemText, Typography } from '@mui/material';
-import type { HighlightRange } from '../types/messages';
-import type { TabInfo } from '../types/messages';
+import type { TabInfo } from '../types/tabs';
 import type { MatchRange } from '../utils/fuzzyMatch';
 import { getMessage } from '../utils/i18n';
 

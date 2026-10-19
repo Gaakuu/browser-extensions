@@ -3,13 +3,13 @@
     "message": "Tab Switcher"
   },
   "extDescription": {
-    "message": "MRU-order tab switcher"
+    "message": "Switch tabs in most-recently-used order from a toolbar panel. Works on every page, including chrome:// and the new tab page."
   },
   "commandShowTabSwitcher": {
-    "message": "Show tab switcher overlay"
+    "message": "Open the tab switcher (hold the modifier, release to switch)"
   },
   "commandSearchTabs": {
-    "message": "Show tab search overlay"
+    "message": "Open the tab switcher in search mode"
   },
   "searchPlaceholder": {
     "message": "Search tabs..."
@@ -88,5 +88,11 @@
   },
   "devtoolsShortcutOther": {
     "message": "Ctrl+Shift+J"
+  },
+  "commandPreviousTab": {
+    "message": "Switch to the previous tab instantly"
+  },
+  "popupHint": {
+    "message": "↑↓ / Tab: move · Enter or release the modifier: switch · ⌘/Ctrl+⌫: close tab · Esc: cancel"
   }
 }

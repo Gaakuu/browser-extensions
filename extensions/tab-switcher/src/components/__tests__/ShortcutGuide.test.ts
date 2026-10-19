@@ -9,7 +9,7 @@ describe('getDevtoolsConsoleCode', () => {
 
   it('全エントリのコマンド名とキーバインドが含まれる', () => {
     const code = getDevtoolsConsoleCode('test-id', OVERRIDE_ENTRIES);
-    expect(code).toContain('commandName: "show-tab-switcher"');
+    expect(code).toContain('commandName: "_execute_action"');
     expect(code).toContain('keybinding: "Ctrl+Tab"');
     expect(code).toContain('commandName: "search-tabs"');
     expect(code).toContain('keybinding: "Ctrl+P"');
@@ -41,11 +41,8 @@ describe('getDevtoolsConsoleCode', () => {
 });
 
 describe('OVERRIDE_ENTRIES', () => {
-  it('show-tab-switcher と search-tabs の2エントリがある', () => {
+  it('_execute_action と search-tabs の2エントリがある', () => {
     expect(OVERRIDE_ENTRIES).toHaveLength(2);
-    expect(OVERRIDE_ENTRIES.map((e) => e.commandName)).toEqual([
-      'show-tab-switcher',
-      'search-tabs',
-    ]);
+    expect(OVERRIDE_ENTRIES.map((e) => e.commandName)).toEqual(['_execute_action', 'search-tabs']);
   });
 });

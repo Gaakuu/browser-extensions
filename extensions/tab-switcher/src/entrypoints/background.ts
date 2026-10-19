@@ -1,11 +1,6 @@
 import { registerBackground } from '../background/registerBackground';
-import { TabHistoryManager } from '../background/TabHistoryManager';
 
-export default defineBackground(async () => {
-  const manager = new TabHistoryManager();
-  await manager.init();
-
-  console.log('[Tab Switcher] Background initialized, tabs:', manager.getAllTabs().length);
-
-  registerBackground(manager);
+export default defineBackground(() => {
+  // リスナーは起動のたびに同期で登録する（Service Worker が止まっても次のイベントで起き直す）
+  registerBackground();
 });
