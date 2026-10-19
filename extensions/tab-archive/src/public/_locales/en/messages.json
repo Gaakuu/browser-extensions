@@ -1,0 +1,42 @@
+{
+  "extName": { "message": "Tab Archive" },
+  "extDescription": {
+    "message": "Automatically closes tabs you haven't viewed for a while and keeps them searchable (like Arc's auto-archive)"
+  },
+  "actionTitle": { "message": "Archived tabs" },
+  "searchPlaceholder": { "message": "Search archived tabs..." },
+  "noResults": { "message": "No results" },
+  "emptyArchive": { "message": "No archived tabs yet" },
+  "removeEntry": { "message": "Remove from archive" },
+  "openSettings": { "message": "Settings" },
+  "archiveNow": { "message": "Archive now" },
+  "archiveCount": {
+    "message": "$COUNT$ tabs",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "archivedNow": {
+    "message": "Archived $COUNT$ tabs",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "optionsTitle": { "message": "Tab Archive settings" },
+  "optionsDescription": {
+    "message": "Unpinned tabs you haven't viewed for a while are closed automatically and kept here. The active tab and tabs playing audio are never closed."
+  },
+  "thresholdLabel": { "message": "Close tabs after" },
+  "thresholdOff": { "message": "Never" },
+  "thresholdHours": {
+    "message": "$N$ hours",
+    "placeholders": { "n": { "content": "$1" } }
+  },
+  "thresholdDays": {
+    "message": "$N$ days",
+    "placeholders": { "n": { "content": "$1" } }
+  },
+  "archiveGroupedTabsLabel": { "message": "Also close tabs in tab groups" },
+  "archiveGroupedTabsHelp": {
+    "message": "When off, tabs in a group are kept, like Arc's pinned tabs."
+  },
+  "omniboxHelp": {
+    "message": "Type \"ar\" and Space in the address bar to search archived tabs."
+  }
+}
