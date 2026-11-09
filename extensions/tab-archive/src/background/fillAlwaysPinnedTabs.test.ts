@@ -5,6 +5,8 @@ import { fillAlwaysPinnedTabs } from './fillAlwaysPinnedTabs';
 let storage: Record<string, unknown>;
 const query = vi.fn();
 const create = vi.fn();
+const getAllWindows = vi.fn();
+let session: Record<string, unknown>;
 const noWait = () => Promise.resolve();
 
 const win = (overrides: Partial<chrome.windows.Window> = {}) =>
@@ -16,6 +18,8 @@ beforeEach(() => {
     .mockReset()
     .mockResolvedValue([{ id: 1, index: 0, pinned: false, url: 'chrome://newtab/' }]);
   create.mockReset().mockResolvedValue({});
+  getAllWindows.mockReset().mockResolvedValue([{ id: 10, type: 'normal', incognito: false }]);
+  session = {};
   vi.stubGlobal('chrome', {
     storage: {
       local: {
@@ -25,7 +29,14 @@ beforeEach(() => {
           cb();
         },
       },
+      session: {
+        get: async (key: string) => ({ [key]: session[key] }),
+        set: async (items: Record<string, unknown>) => {
+          Object.assign(session, items);
+        },
+      },
     },
+    windows: { getAll: getAllWindows },
     tabs: { query, create },
   });
 });
@@ -63,11 +74,42 @@ describe('fillAlwaysPinnedTabs', () => {
     expect(create).not.toHaveBeenCalled();
   });
 
-  it('設定が空なら何もしない', async () => {
+  it('登録一覧が空なら、ほかのウィンドウで開いている固定タブを登録して開く', async () => {
+    storage = {};
+    getAllWindows.mockResolvedValue([
+      { id: 10, type: 'normal', incognito: false },
+      { id: 20, type: 'normal', incognito: false },
+    ]);
+    query.mockImplementation(async (q: { windowId: number; pinned?: boolean }) => {
+      if (q.windowId === 20 && q.pinned) {
+        return [
+          { id: 7, windowId: 20, index: 1, pinned: true, url: 'https://calendar/' },
+          { id: 6, windowId: 20, index: 0, pinned: true, url: 'https://mail/' },
+        ];
+      }
+      if (q.windowId === 10 && !q.pinned) {
+        return [{ id: 1, index: 0, pinned: false, url: 'chrome://newtab/' }];
+      }
+      return [];
+    });
+
+    await expect(fillAlwaysPinnedTabs(win(), noWait)).resolves.toBe(2);
+
+    expect((storage[SETTINGS_KEY] as { alwaysPinnedUrls: string[] }).alwaysPinnedUrls).toEqual([
+      'https://mail/',
+      'https://calendar/',
+    ]);
+    expect(create.mock.calls.map(([arg]) => arg.url)).toEqual([
+      'https://mail/',
+      'https://calendar/',
+    ]);
+  });
+
+  it('登録一覧が空で、どこにも固定タブが無ければ何もしない', async () => {
     storage = {};
 
     await expect(fillAlwaysPinnedTabs(win(), noWait)).resolves.toBe(0);
-    expect(query).not.toHaveBeenCalled();
+    expect(create).not.toHaveBeenCalled();
   });
 
   it('待っている間にウィンドウが閉じられたら何もしない', async () => {

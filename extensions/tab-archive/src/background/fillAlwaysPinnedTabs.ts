@@ -1,5 +1,6 @@
 import { urlsToPin } from '../core/alwaysPinned';
 import { loadSettings } from '../core/settings';
+import { seedPinnedList } from './pinnedTabSync';
 import { setSlots } from './slotMap';
 
 /**
@@ -16,8 +17,7 @@ export async function fillAlwaysPinnedTabs(
   wait: () => Promise<void> = () => sleep(SETTLE_MS),
 ): Promise<number> {
   if (win.id == null || win.type !== 'normal' || win.incognito) return 0;
-  const { alwaysPinnedUrls, syncPinnedTabs } = await loadSettings();
-  if (!syncPinnedTabs || alwaysPinnedUrls.length === 0) return 0;
+  if (!(await loadSettings()).syncPinnedTabs) return 0;
 
   await wait();
   let tabs: chrome.tabs.Tab[];
@@ -26,6 +26,9 @@ export async function fillAlwaysPinnedTabs(
   } catch {
     return 0; // 待っている間にウィンドウが閉じられた
   }
+  // 一覧が空なら、ほかのウィンドウで今開いている固定タブを使う
+  const alwaysPinnedUrls = await seedPinnedList(win.id);
+  if (alwaysPinnedUrls.length === 0) return 0;
 
   const urls = urlsToPin(alwaysPinnedUrls, tabs);
   for (const url of urls) {

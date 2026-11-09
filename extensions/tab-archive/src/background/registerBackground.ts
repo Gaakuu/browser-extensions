@@ -10,6 +10,7 @@ import {
   handleRemoved,
   handleUnpinned,
   resetActivePinnedTab,
+  seedPinnedList,
 } from './pinnedTabSync';
 
 export const ALARM_NAME = 'tab-archive-sweep';
@@ -25,6 +26,10 @@ function ensureAlarm(): void {
 export function registerBackground(): void {
   chrome.runtime.onInstalled.addListener(ensureAlarm);
   chrome.runtime.onStartup.addListener(ensureAlarm);
+  // 入れた・更新したとき、Chrome を起動したとき、登録一覧が空なら今の固定タブで埋める
+  const seed = () => void enqueue(async () => void (await seedPinnedList()));
+  chrome.runtime.onInstalled.addListener(seed);
+  chrome.runtime.onStartup.addListener(seed);
 
   // 新しいウィンドウにも、設定した固定タブを出す
   chrome.windows.onCreated.addListener((win) => {

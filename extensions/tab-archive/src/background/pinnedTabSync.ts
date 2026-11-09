@@ -1,4 +1,4 @@
-import { isPinnableUrl } from '../core/alwaysPinned';
+import { isPinnableUrl, pinnedUrlsOf } from '../core/alwaysPinned';
 import {
   assignSlots,
   insertIndex,
@@ -62,6 +62,32 @@ async function pinnedEntries(
 
 const slotsOf = (entries: PinnedEntry[]) =>
   entries.map((e) => e.slot).filter((s): s is string => !!s);
+
+/**
+ * 登録一覧が空なら、今開いている固定タブで埋める（いちばん固定タブの多いウィンドウを使う）。
+ * 設定で「登録する」を押していなくても、すでに固定しているタブが新しいウィンドウに出るように。
+ * 同期がオフ、または一覧がもうあるときは今の一覧を返す。
+ */
+export async function seedPinnedList(excludeWindowId?: number): Promise<string[]> {
+  const settings = await loadSettings();
+  if (!settings.syncPinnedTabs || settings.alwaysPinnedUrls.length > 0) {
+    return settings.alwaysPinnedUrls;
+  }
+  const wins = (await chrome.windows.getAll({ windowTypes: ['normal'] })).filter(
+    (w) => w.id != null && w.id !== excludeWindowId && !w.incognito,
+  );
+  let best: chrome.tabs.Tab[] = [];
+  for (const win of wins) {
+    const pinned = await chrome.tabs.query({ windowId: win.id, pinned: true });
+    if (pinnedUrlsOf(pinned).length > pinnedUrlsOf(best).length) best = pinned;
+  }
+  const urls = pinnedUrlsOf(best);
+  if (urls.length === 0) return [];
+
+  await saveSettings({ ...settings, alwaysPinnedUrls: urls });
+  await pinnedEntries(best[0].windowId, urls);
+  return urls;
+}
 
 /** タブを固定した */
 export async function handlePinned(tab: chrome.tabs.Tab): Promise<void> {
