@@ -69,6 +69,8 @@ export class OverlayManager {
 
     this.host!.style.display = 'block';
     this.host!.style.pointerEvents = 'auto';
+    // 撮影モードに入った瞬間から十字にする（要素を選ぶときも、範囲をドラッグするときも）
+    this.host!.style.cursor = 'crosshair';
     this.startElementDetection();
     this.render();
   }
@@ -78,6 +80,7 @@ export class OverlayManager {
 
     if (this.host) {
       this.host.style.display = 'none';
+      this.host.style.cursor = '';
     }
 
     this.state = {
@@ -97,6 +100,7 @@ export class OverlayManager {
     this.stopDetection();
     this.host!.style.display = 'block';
     this.host!.style.pointerEvents = 'none'; // ページ操作を邪魔しない
+    this.host!.style.cursor = '';
     this.state = {
       ...this.state,
       mode: 'preview',
