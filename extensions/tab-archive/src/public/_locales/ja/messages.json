@@ -38,5 +38,12 @@
   },
   "omniboxHelp": {
     "message": "アドレスバーで「ar」と打ってスペースを押すと、閉じたタブから検索できます。"
-  }
+  },
+  "alwaysPinnedTitle": { "message": "どのウィンドウにも出す固定タブ" },
+  "alwaysPinnedHelp": {
+    "message": "新しいウィンドウを開くと、ここにあるページを固定タブとして開きます。ウィンドウごとに別のタブなので、ページの状態は共有されません。固定タブがすでにあるウィンドウ（Chrome を起動し直したときなど）には足しません。"
+  },
+  "alwaysPinnedCapture": { "message": "今のウィンドウの固定タブを登録する（置き換え）" },
+  "alwaysPinnedEmpty": { "message": "まだ登録していません" },
+  "alwaysPinnedRemove": { "message": "一覧から外す" }
 }

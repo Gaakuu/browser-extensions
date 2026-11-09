@@ -15,15 +15,18 @@ export interface Settings {
   thresholdHours: number;
   /** タブグループに入っているタブも閉じるか */
   archiveGroupedTabs: boolean;
+  /** 新しいウィンドウを開いたときに固定タブとして開く URL（並び順どおり） */
+  alwaysPinnedUrls: string[];
 }
 
 export const DEFAULT_SETTINGS: Settings = {
-  // Arc の既定と同じ 12 時間
-  thresholdHours: 12,
+  // 18 時間（Arc の既定は 12 時間）
+  thresholdHours: 18,
   archiveGroupedTabs: false,
+  alwaysPinnedUrls: [],
 };
 
-/** 選べる時間（Arc の選択肢に 1 時間を足したもの） */
-export const THRESHOLD_CHOICES = [0, 1, 12, 24, 24 * 7, 24 * 30] as const;
+/** 選べる時間（Arc の選択肢に 1 時間と 18 時間を足したもの） */
+export const THRESHOLD_CHOICES = [0, 1, 12, 18, 24, 24 * 7, 24 * 30] as const;
 
 export type BackgroundMessage = { type: 'ARCHIVE_NOW' };

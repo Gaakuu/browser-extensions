@@ -2,6 +2,7 @@ import { loadArchive } from '../core/ArchiveStore';
 import { escapeOmniboxText, searchArchive } from '../core/searchArchive';
 import type { BackgroundMessage } from '../types';
 import { archiveIdleTabs } from './archiveIdleTabs';
+import { fillAlwaysPinnedTabs } from './fillAlwaysPinnedTabs';
 
 export const ALARM_NAME = 'tab-archive-sweep';
 /** 何分ごとに見回るか */
@@ -15,6 +16,11 @@ function ensureAlarm(): void {
 export function registerBackground(): void {
   chrome.runtime.onInstalled.addListener(ensureAlarm);
   chrome.runtime.onStartup.addListener(ensureAlarm);
+
+  // 新しいウィンドウにも、設定した固定タブを出す
+  chrome.windows.onCreated.addListener((win) => {
+    void fillAlwaysPinnedTabs(win);
+  });
 
   chrome.alarms.onAlarm.addListener((alarm) => {
     if (alarm.name === ALARM_NAME) void archiveIdleTabs();

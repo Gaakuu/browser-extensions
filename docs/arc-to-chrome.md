@@ -10,7 +10,9 @@ Arc の設定ファイル（`~/Library/Application Support/Arc/`）から、実�
 | ピン留め（Space ごと・フォルダつき） | Work 22 件、Development 82 件、フォルダ 15 個 | `tools/arc-export` でブックマーク HTML に変換済み（`~/Downloads/arc-bookmarks.html`）。ブックマークバーに Space ごとのフォルダとして入る |
 | Favorites（上のアイコン） | 9 件（Gmail、Calendar、Gemini、GitHub、Jira、ChatGPT、勤怠、Drive、Docs） | 同じ HTML の「Favorites」フォルダ。よく使うものは Chrome のタブの固定（右クリック →「固定」）にする |
 | Spaces | Work / Development の2つ（同じプロフィール） | ブックマークバーのフォルダ ＋ Chrome のタブグループ（保存しておける）。ウィンドウを分けたいときはウィンドウ2つ |
-| 自動アーカイブ | アーカイブ 2,759 件。閾値は既定（12 時間） | 自作の **tab-archive**。12 時間見ていないタブを閉じ、パネルとアドレスバー（`ar` ＋ スペース）から探して開き直せる |
+| 自動アーカイブ | アーカイブ 2,759 件。閾値は既定（12 時間） | 自作の **tab-archive**。18 時間見ていないタブを閉じ（設定で 12 時間・1 日なども選べる）、パネルとアドレスバー（`ar` ＋ スペース）から探して開き直せる |
+| どの Space でも同じピン留め | — | tab-archive の設定「どのウィンドウにも出す固定タブ」。新しいウィンドウを開くと、登録した固定タブを開く（ウィンドウごとに別のタブ） |
+| ⌘⇧C で URL をコピー | — | 自作の **copy-url**。⌘⇧C は Chrome 本体のキーと重なるので、`chrome://extensions/shortcuts` で手で割り当てる |
 | Ctrl+Tab（最近使った順の切り替え） | — | 自作の **tab-switcher**。⌘⇧Space でパネル、⌃Q で直前のタブ。chrome:// や新しいタブでも動く |
 | Command Bar でタブを探す | — | tab-switcher で文字を打つ（⌘⇧P で検索から開く）。Chrome 標準のタブ検索（⌘⇧A）とアドレスバーの「タブに切り替え」も使える |
 | Capture（スクリーンショット） | 2,972 件、今日も使用 | 自作の **screenshot**（⌘⇧2。Arc と同じキー）。要素・範囲・ページ全体。chrome:// のページでは使えないので、そこは macOS の ⌘⇧4 |
@@ -30,6 +32,7 @@ Little Arc・Peek・Boosts・Live Folder は、使った形跡が少ないか無
 | tab-switcher | `extensions/tab-switcher/.output/chrome-mv3` |
 | tab-archive | `extensions/tab-archive/.output/chrome-mv3` |
 | screenshot | `extensions/screenshot/.output/chrome-mv3` |
+| copy-url | `extensions/copy-url/.output/chrome-mv3` |
 
 tab-switcher の使い方:
 
@@ -62,10 +65,11 @@ tab-switcher の使い方:
 ### 4. 自作の拡張を読み込む
 
 1. Chrome で `chrome://extensions` を開き、右上の「デベロッパー モード」をオンにする
-2. 「パッケージ化されていない拡張機能を読み込む」で、上の表の3つのフォルダを順に選ぶ
+2. 「パッケージ化されていない拡張機能を読み込む」で、上の表のフォルダを順に選ぶ
 3. `chrome://extensions/shortcuts` を開き、Tab Switcher の3つ（⌘⇧Space・⌃Q・⌘⇧P）と screenshot（⌘⇧2）が割り当たっているか見る。空欄なら、ほかの拡張とぶつかっているので割り当て直す
-4. ツールバーのパズルのアイコンから Tab Switcher と Tab Archive をピン留めする
-5. Tab Archive のアイコン → 設定で、閉じるまでの時間（既定 12 時間）を確かめる
+   - Copy URL は空欄で入る。「今のタブの URL をコピー」の欄を押して ⌘⇧C を押す。効かないときは ⌘⇧Y にする
+4. ツールバーのパズルのアイコンから Tab Switcher・Tab Archive・Copy URL をピン留めする（Copy URL はコピーしたときにアイコンへ ✓ が出る）
+5. Tab Archive のアイコン → 設定で、閉じるまでの時間（既定 18 時間）を確かめる
 
 ### 5. 拡張を入れ直す
 
@@ -88,6 +92,7 @@ TrendAI Toolbar と SkyChromeExtension は会社の管理ソフトが入れる�
 1. 縦のタブ: タブ列を右クリック →「タブを縦に表示」（無ければ `chrome://settings/appearance`）
 2. アドレスバーを右クリック →「URL 全体を常に表示」
 3. よく使うサイト（Gmail・Calendar など）はタブを開いて右クリック →「固定」
+4. 固定し終えたら、Tab Archive の設定で「今のウィンドウの固定タブを登録する」を押す。以後、新しいウィンドウにも同じ固定タブが出る
 
 ### 7. 切り替える
 

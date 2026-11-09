@@ -16,18 +16,18 @@ const tab = (overrides: Partial<chrome.tabs.Tab>): chrome.tabs.Tab =>
     groupId: -1,
     url: 'https://example.com/',
     title: 'Example',
-    lastAccessed: NOW - 13 * HOUR,
+    lastAccessed: NOW - 25 * HOUR,
     ...overrides,
   }) as chrome.tabs.Tab;
 
 describe('selectTabsToArchive', () => {
-  it('12 時間以上見ていないタブを選ぶ', () => {
-    const tabs = [tab({ id: 1 }), tab({ id: 2, lastAccessed: NOW - 11 * HOUR })];
+  it('既定では 18 時間以上見ていないタブを選ぶ', () => {
+    const tabs = [tab({ id: 1 }), tab({ id: 2, lastAccessed: NOW - 17 * HOUR })];
     expect(selectTabsToArchive(tabs, DEFAULT_SETTINGS, NOW).map((t) => t.id)).toEqual([1]);
   });
 
   it('ちょうどしきい値のタブも選ぶ', () => {
-    const tabs = [tab({ lastAccessed: NOW - 12 * HOUR })];
+    const tabs = [tab({ lastAccessed: NOW - 18 * HOUR })];
     expect(selectTabsToArchive(tabs, DEFAULT_SETTINGS, NOW)).toHaveLength(1);
   });
 

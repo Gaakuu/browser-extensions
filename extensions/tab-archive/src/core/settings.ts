@@ -13,6 +13,13 @@ export function normalizeSettings(raw: unknown): Settings {
       typeof value.archiveGroupedTabs === 'boolean'
         ? value.archiveGroupedTabs
         : DEFAULT_SETTINGS.archiveGroupedTabs,
+    alwaysPinnedUrls: Array.isArray(value.alwaysPinnedUrls)
+      ? [
+          ...new Set(
+            value.alwaysPinnedUrls.filter((u): u is string => typeof u === 'string' && u !== ''),
+          ),
+        ]
+      : DEFAULT_SETTINGS.alwaysPinnedUrls,
   };
 }
 

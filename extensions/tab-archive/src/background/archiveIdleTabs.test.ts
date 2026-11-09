@@ -30,7 +30,7 @@ beforeEach(() => {
 describe('archiveIdleTabs', () => {
   it('古いタブを記録してから閉じる', async () => {
     query.mockResolvedValue([
-      { id: 1, url: 'https://old/', title: 'Old', lastAccessed: NOW - 13 * HOUR, groupId: -1 },
+      { id: 1, url: 'https://old/', title: 'Old', lastAccessed: NOW - 25 * HOUR, groupId: -1 },
       { id: 2, url: 'https://new/', title: 'New', lastAccessed: NOW - HOUR, groupId: -1 },
     ]);
 

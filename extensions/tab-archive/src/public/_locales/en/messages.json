@@ -38,5 +38,12 @@
   },
   "omniboxHelp": {
     "message": "Type \"ar\" and Space in the address bar to search archived tabs."
-  }
+  },
+  "alwaysPinnedTitle": { "message": "Pinned tabs for every window" },
+  "alwaysPinnedHelp": {
+    "message": "When you open a new window, these pages open as pinned tabs. Each window gets its own copy, so page state is not shared. Windows that already have pinned tabs (for example after restarting Chrome) are left as they are."
+  },
+  "alwaysPinnedCapture": { "message": "Use this window's pinned tabs (replace)" },
+  "alwaysPinnedEmpty": { "message": "Nothing yet" },
+  "alwaysPinnedRemove": { "message": "Remove" }
 }

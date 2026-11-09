@@ -101,9 +101,29 @@ describe('settings', () => {
   });
 
   it('正しい値はそのまま使う', () => {
-    expect(normalizeSettings({ thresholdHours: 24, archiveGroupedTabs: true })).toEqual({
-      thresholdHours: 24,
+    expect(
+      normalizeSettings({
+        thresholdHours: 12,
+        archiveGroupedTabs: true,
+        alwaysPinnedUrls: ['https://mail.google.com/', 'https://calendar.google.com/'],
+      }),
+    ).toEqual({
+      thresholdHours: 12,
       archiveGroupedTabs: true,
+      alwaysPinnedUrls: ['https://mail.google.com/', 'https://calendar.google.com/'],
     });
+  });
+
+  it('既定は 18 時間で、常に出す固定タブは無し', () => {
+    expect(DEFAULT_SETTINGS.thresholdHours).toBe(18);
+    expect(DEFAULT_SETTINGS.alwaysPinnedUrls).toEqual([]);
+  });
+
+  it('常に出す固定タブの URL は、文字列でないものと重なりを落とす', () => {
+    expect(
+      normalizeSettings({ alwaysPinnedUrls: ['https://a/', 1, '', 'https://a/', 'https://b/'] })
+        .alwaysPinnedUrls,
+    ).toEqual(['https://a/', 'https://b/']);
+    expect(normalizeSettings({ alwaysPinnedUrls: 'https://a/' }).alwaysPinnedUrls).toEqual([]);
   });
 });
