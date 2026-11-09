@@ -9,8 +9,8 @@
     "test": "vitest run"
   },
   "devDependencies": {
-    "@types/node": "~22.15.0",
-    "tsx": "~4.19.0"
+    "@types/node": "~22.20.5",
+    "tsx": "~4.23.15"
   },
   "volta": {
     "extends": "../../package.json"
