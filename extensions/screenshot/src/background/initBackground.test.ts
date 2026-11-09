@@ -31,6 +31,9 @@ type MessageListener = (
 
 const mockTabsSendMessage = vi.fn();
 const mockTabsQuery = vi.fn();
+const mockExecuteScript = vi.fn();
+const mockSetBadgeText = vi.fn();
+let actionClickListener: (tab: { id?: number }) => void;
 
 let commandListener: CommandListener;
 let messageListener: MessageListener;
@@ -58,12 +61,26 @@ function setupChromeStubs() {
       query: (...args: unknown[]) => mockTabsQuery(...args),
       sendMessage: (...args: unknown[]) => mockTabsSendMessage(...args),
     },
+    scripting: {
+      executeScript: (...args: unknown[]) => mockExecuteScript(...args),
+    },
+    action: {
+      onClicked: {
+        addListener: (cb: (tab: { id?: number }) => void) => {
+          actionClickListener = cb;
+        },
+      },
+      setBadgeText: (...args: unknown[]) => mockSetBadgeText(...args),
+      setBadgeBackgroundColor: vi.fn(),
+    },
   });
 }
 
 describe('background entrypoint', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockTabsSendMessage.mockReset().mockResolvedValue(undefined);
+    mockExecuteScript.mockReset();
     setupChromeStubs();
     mockTabsQuery.mockResolvedValue([{ id: 1 }]);
     initBackground();
@@ -75,6 +92,39 @@ describe('background entrypoint', () => {
 
       expect(mockTabsQuery).toHaveBeenCalledWith({ active: true, currentWindow: true });
       expect(mockTabsSendMessage).toHaveBeenCalledWith(1, { type: 'START_CAPTURE' });
+    });
+
+    it('Content Script の無いタブには差し込んでから送り直す', async () => {
+      mockTabsSendMessage
+        .mockRejectedValueOnce(new Error('Receiving end does not exist'))
+        .mockResolvedValueOnce(undefined);
+      mockExecuteScript.mockResolvedValue([]);
+
+      await commandListener('capture-screenshot');
+
+      expect(mockExecuteScript).toHaveBeenCalledWith({
+        target: { tabId: 1 },
+        files: ['content-scripts/content.js'],
+      });
+      expect(mockTabsSendMessage).toHaveBeenCalledTimes(2);
+      expect(mockSetBadgeText).not.toHaveBeenCalled();
+    });
+
+    it('差し込めないページ（chrome:// など）ではエラーにせずバッジで知らせる', async () => {
+      mockTabsSendMessage.mockRejectedValue(new Error('Receiving end does not exist'));
+      mockExecuteScript.mockRejectedValue(new Error('Cannot access a chrome:// URL'));
+
+      await expect(commandListener('capture-screenshot')).resolves.toBeUndefined();
+
+      expect(mockSetBadgeText).toHaveBeenCalledWith({ text: '!' });
+    });
+
+    it('ツールバーのアイコンを押しても撮影を始める', async () => {
+      actionClickListener({ id: 5 });
+
+      await vi.waitFor(() => {
+        expect(mockTabsSendMessage).toHaveBeenCalledWith(5, { type: 'START_CAPTURE' });
+      });
     });
 
     it('不明なコマンドでは何もしない', async () => {

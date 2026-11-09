@@ -17,6 +17,36 @@ async function capture(
   }
 }
 
+const CONTENT_SCRIPT_FILE = 'content-scripts/content.js';
+
+/** 撮れないページ（chrome:// ・新しいタブ・ウェブストア）で押されたことを、アイコンのバッジで一瞬知らせる */
+async function flashUnavailable() {
+  await chrome.action.setBadgeBackgroundColor({ color: '#c62828' });
+  await chrome.action.setBadgeText({ text: '!' });
+  setTimeout(() => {
+    void chrome.action.setBadgeText({ text: '' });
+  }, 1500);
+}
+
+/**
+ * 撮影の画面を出す。拡張を入れる前から開いていたタブには Content Script が入っていないので、
+ * 送れなければ差し込んでから送り直す。差し込めないページではバッジで知らせる。
+ */
+export async function startCapture(tabId: number) {
+  try {
+    await chrome.tabs.sendMessage(tabId, { type: 'START_CAPTURE' });
+    return;
+  } catch {
+    // Content Script が無い。下で差し込む
+  }
+  try {
+    await chrome.scripting.executeScript({ target: { tabId }, files: [CONTENT_SCRIPT_FILE] });
+    await chrome.tabs.sendMessage(tabId, { type: 'START_CAPTURE' });
+  } catch {
+    await flashUnavailable();
+  }
+}
+
 export function initBackground() {
   const captureService = new CaptureService();
   const downloadService = new DownloadService();
@@ -27,7 +57,11 @@ export function initBackground() {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     if (!tab?.id) return;
 
-    chrome.tabs.sendMessage(tab.id, { type: 'START_CAPTURE' });
+    await startCapture(tab.id);
+  });
+
+  chrome.action.onClicked.addListener((tab) => {
+    if (tab.id) void startCapture(tab.id);
   });
 
   chrome.runtime.onMessage.addListener((message: ContentMessage, sender, sendResponse) => {
