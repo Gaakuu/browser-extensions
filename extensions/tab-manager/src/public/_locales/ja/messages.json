@@ -1,7 +1,7 @@
 {
-  "extName": { "message": "Tab Archive" },
+  "extName": { "message": "Tab Manager" },
   "extDescription": {
-    "message": "しばらく見ていないタブを自動で閉じて残す（Arc の自動アーカイブの代わり）"
+    "message": "固定タブをどのウィンドウでもそろえ、しばらく見ていないタブを自動で閉じて残す（Arc の代わり）"
   },
   "actionTitle": { "message": "アーカイブしたタブ" },
   "searchPlaceholder": { "message": "閉じたタブを検索..." },
@@ -18,7 +18,7 @@
     "message": "$COUNT$ 件を閉じました",
     "placeholders": { "count": { "content": "$1" } }
   },
-  "optionsTitle": { "message": "Tab Archive の設定" },
+  "optionsTitle": { "message": "Tab Manager の設定" },
   "optionsDescription": {
     "message": "ピン留めしていないタブを、見ていない時間が長くなったら自動で閉じ、ここに残します。表示中のタブ・音が出ているタブは閉じません。"
   },
@@ -45,5 +45,20 @@
   },
   "alwaysPinnedCapture": { "message": "今のウィンドウの固定タブを登録する（置き換え）" },
   "alwaysPinnedEmpty": { "message": "まだ登録していません" },
-  "alwaysPinnedRemove": { "message": "一覧から外す" }
+  "alwaysPinnedRemove": { "message": "一覧から外す" },
+  "syncPinnedLabel": { "message": "固定タブをウィンドウ間でそろえる" },
+  "syncPinnedHelp": {
+    "message": "オンの間は、どこかのウィンドウで固定・固定解除・並べ替えをすると、ほかのウィンドウにも同じようにします。閉じたときはそのウィンドウだけです。オフにすると、新しいウィンドウにも開きません。"
+  },
+  "syncPinnedShort": { "message": "固定タブの同期" },
+  "commandResetPinnedTab": { "message": "固定タブを登録したときの URL に戻す" },
+  "resetPinnedLabel": { "message": "固定タブを元の URL に戻す" },
+  "resetPinnedOff": { "message": "戻さない" },
+  "resetPinnedMinutes": {
+    "message": "$N$ 分見ていなかったら",
+    "placeholders": { "n": { "content": "$1" } }
+  },
+  "resetPinnedHelp": {
+    "message": "しばらく見ていなかった固定タブに切り替えたとき、登録した URL で開き直します（Gmail のスレッドを開いたまま離れても、次は受信トレイから）。⌥⇧R でいつでも戻せます。"
+  }
 }

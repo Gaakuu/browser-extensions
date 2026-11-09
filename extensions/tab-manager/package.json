@@ -1,5 +1,5 @@
 {
-  "name": "@browser-extensions/tab-archive",
+  "name": "@browser-extensions/tab-manager",
   "version": "0.0.1",
   "private": true,
   "type": "module",

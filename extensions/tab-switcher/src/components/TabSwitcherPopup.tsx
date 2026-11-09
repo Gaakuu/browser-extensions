@@ -9,6 +9,8 @@ import { TabCard } from './TabCard';
 interface TabSwitcherPopupProps {
   /** 最近使った順。先頭は表示中のタブ */
   tabs: TabInfo[];
+  /** ほかのウィンドウのタブ（最近使った順）。文字を打ったときだけ検索に入れる */
+  otherTabs?: TabInfo[];
   mode: PopupMode;
   onSwitch: (tabId: number) => void;
   onCloseTab: (tabId: number) => void;
@@ -16,6 +18,8 @@ interface TabSwitcherPopupProps {
 }
 
 const POPUP_WIDTH = 480;
+/** otherTabs を渡さないときの既定。毎回新しい配列を作ると、下の useEffect が回り続ける */
+const NO_TABS: TabInfo[] = [];
 const LIST_MAX_HEIGHT = 440;
 
 function isMoveDown(e: KeyboardEvent): boolean {
@@ -31,12 +35,14 @@ function isMoveUp(e: KeyboardEvent): boolean {
 
 export function TabSwitcherPopup({
   tabs: initialTabs,
+  otherTabs: initialOtherTabs = NO_TABS,
   mode,
   onSwitch,
   onCloseTab,
   onDismiss,
 }: TabSwitcherPopupProps) {
   const [tabs, setTabs] = useState(initialTabs);
+  const [otherTabs, setOtherTabs] = useState(initialOtherTabs);
   const [query, setQuery] = useState('');
   const [focusIndex, setFocusIndex] = useState(mode === 'switcher' && initialTabs.length > 1 ? 1 : 0);
   const holdRef = useRef(new HoldToConfirm(mode === 'switcher'));
@@ -44,8 +50,14 @@ export function TabSwitcherPopup({
   const listRef = useRef<HTMLUListElement>(null);
 
   useEffect(() => setTabs(initialTabs), [initialTabs]);
+  useEffect(() => setOtherTabs(initialOtherTabs), [initialOtherTabs]);
 
-  const results = useMemo(() => fuzzySearchTabs(query, tabs), [query, tabs]);
+  // 何も打っていなければ今のウィンドウだけ。打ったら、ほかのウィンドウのタブからも探す
+  const results = useMemo(
+    () => fuzzySearchTabs(query, query === '' ? tabs : [...tabs, ...otherTabs]),
+    [query, tabs, otherTabs],
+  );
+  const otherIds = useMemo(() => new Set(otherTabs.map((t) => t.id)), [otherTabs]);
   const focused = results[Math.min(focusIndex, results.length - 1)]?.tab;
 
   // 最新の値をキーボードのハンドラから参照する
@@ -55,6 +67,7 @@ export function TabSwitcherPopup({
   const closeTab = (tabId: number) => {
     onCloseTab(tabId);
     setTabs((prev) => prev.filter((t) => t.id !== tabId));
+    setOtherTabs((prev) => prev.filter((t) => t.id !== tabId));
   };
   const closeTabRef = useRef(closeTab);
   closeTabRef.current = closeTab;
@@ -137,6 +150,7 @@ export function TabSwitcherPopup({
             key={result.tab.id}
             tab={result.tab}
             isFocused={result.tab.id === focused?.id}
+            inOtherWindow={otherIds.has(result.tab.id)}
             onSelect={() => onSwitch(result.tab.id)}
             onClose={() => closeTab(result.tab.id)}
             highlights={result.highlights}

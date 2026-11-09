@@ -20,6 +20,15 @@ export default defineConfig({
     action: {
       default_title: '__MSG_actionTitle__',
     },
+    commands: {
+      'reset-pinned-tab': {
+        suggested_key: {
+          default: 'Alt+Shift+R',
+          mac: 'Alt+Shift+R',
+        },
+        description: '__MSG_commandResetPinnedTab__',
+      },
+    },
     omnibox: {
       keyword: 'ar',
     },

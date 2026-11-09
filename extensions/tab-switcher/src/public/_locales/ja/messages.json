@@ -93,6 +93,9 @@
     "message": "直前のタブにすぐ戻る"
   },
   "popupHint": {
-    "message": "↑↓ / Tab: 移動 · Enter か修飾キーを離す: 切り替え · ⌘/Ctrl+⌫: タブを閉じる · Esc: やめる"
+    "message": "↑↓ / Tab: 移動 · Enter か修飾キーを離す: 切り替え · 文字を打つと全ウィンドウから探す · ⌘/Ctrl+⌫: タブを閉じる · Esc: やめる"
+  },
+  "otherWindow": {
+    "message": "別のウィンドウ"
   }
 }

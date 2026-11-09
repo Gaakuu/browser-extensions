@@ -1,5 +1,7 @@
 import { urlsToPin } from '../core/alwaysPinned';
 import { loadSettings } from '../core/settings';
+import { seedPinnedList } from './pinnedTabSync';
+import { setSlots } from './slotMap';
 
 /**
  * ウィンドウが開いた直後はタブがまだそろっていない（起動時の復元など）ので、少し待ってから見る。
@@ -15,8 +17,7 @@ export async function fillAlwaysPinnedTabs(
   wait: () => Promise<void> = () => sleep(SETTLE_MS),
 ): Promise<number> {
   if (win.id == null || win.type !== 'normal' || win.incognito) return 0;
-  const { alwaysPinnedUrls } = await loadSettings();
-  if (alwaysPinnedUrls.length === 0) return 0;
+  if (!(await loadSettings()).syncPinnedTabs) return 0;
 
   await wait();
   let tabs: chrome.tabs.Tab[];
@@ -25,11 +26,21 @@ export async function fillAlwaysPinnedTabs(
   } catch {
     return 0; // 待っている間にウィンドウが閉じられた
   }
+  // 一覧が空なら、ほかのウィンドウで今開いている固定タブを使う
+  const alwaysPinnedUrls = await seedPinnedList(win.id);
+  if (alwaysPinnedUrls.length === 0) return 0;
 
   const urls = urlsToPin(alwaysPinnedUrls, tabs);
   for (const url of urls) {
     // 固定タブは左端の固定タブの並びの後ろに入るので、順に作れば設定の並びになる
-    await chrome.tabs.create({ windowId: win.id, url, pinned: true, active: false });
+    const created = await chrome.tabs.create({
+      windowId: win.id,
+      url,
+      pinned: true,
+      active: false,
+    });
+    // どの slot のタブかを覚えておく（固定を外したときに、ほかのウィンドウからも閉じるため）
+    if (created?.id != null) await setSlots([[created.id, url]]);
   }
   return urls.length;
 }
