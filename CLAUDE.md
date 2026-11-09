@@ -33,6 +33,7 @@ cd extensions/tab-switcher && npx vitest run src/utils/fuzzyMatch.test.ts
 ### ワークスペース構成
 
 - `extensions/tab-switcher/` — メイン拡張機能（WXT + React）
+- `extensions/copy-url/` — 今のタブの URL をコピーする（⌘⇧C を chrome://extensions/shortcuts で割り当てる。Chrome 本体のキーと重なるので自動では割り当たらない）
 - `extensions/sample/` — 最小構成のサンプル拡張機能
 - `packages/shared/` — Chrome ストレージユーティリティ（`getStorageItem`, `setStorageItem`）
 - `packages/ui/` — MUI ダーク/ライトテーマ、ThemeProvider、CssBaseline の再エクスポート
