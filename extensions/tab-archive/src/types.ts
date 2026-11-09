@@ -17,6 +17,8 @@ export interface Settings {
   archiveGroupedTabs: boolean;
   /** 新しいウィンドウを開いたときに固定タブとして開く URL（並び順どおり） */
   alwaysPinnedUrls: string[];
+  /** 固定タブをウィンドウ間でそろえるか（固定・固定解除・並べ替え・新しいウィンドウ） */
+  syncPinnedTabs: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -24,6 +26,7 @@ export const DEFAULT_SETTINGS: Settings = {
   thresholdHours: 18,
   archiveGroupedTabs: false,
   alwaysPinnedUrls: [],
+  syncPinnedTabs: true,
 };
 
 /** 選べる時間（Arc の選択肢に 1 時間と 18 時間を足したもの） */

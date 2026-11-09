@@ -9,6 +9,7 @@ import {
   ListItemButton,
   ListItemText,
   Stack,
+  Switch,
   TextField,
   Tooltip,
   Typography,
@@ -29,6 +30,9 @@ export interface ArchivePopupProps {
   onOpenSettings: () => void;
   /** 直前の「今すぐ整理」で閉じた件数 */
   lastArchivedCount?: number | null;
+  /** 固定タブをウィンドウ間でそろえているか。undefined なら切り替えを出さない */
+  syncPinned?: boolean;
+  onToggleSyncPinned?: (next: boolean) => void;
 }
 
 /** 表示する件数の上限（検索すれば全件から探せる） */
@@ -42,6 +46,8 @@ export function ArchivePopup({
   onArchiveNow,
   onOpenSettings,
   lastArchivedCount,
+  syncPinned,
+  onToggleSyncPinned,
 }: ArchivePopupProps) {
   const [query, setQuery] = useState('');
   const matches = useMemo(() => searchArchive(entries, query), [entries, query]);
@@ -115,9 +121,26 @@ export function ArchivePopup({
             ? getMessage('archivedNow', String(lastArchivedCount))
             : getMessage('archiveCount', String(entries.length))}
         </Typography>
-        <Button size="small" onClick={onArchiveNow}>
-          {getMessage('archiveNow')}
-        </Button>
+        <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+          {syncPinned !== undefined && (
+            <Tooltip title={getMessage('syncPinnedHelp')}>
+              <Stack direction="row" sx={{ alignItems: 'center' }}>
+                <Switch
+                  size="small"
+                  checked={syncPinned}
+                  onChange={(e) => onToggleSyncPinned?.(e.target.checked)}
+                  slotProps={{ input: { 'aria-label': getMessage('syncPinnedShort') } }}
+                />
+                <Typography variant="caption" color="text.secondary">
+                  {getMessage('syncPinnedShort')}
+                </Typography>
+              </Stack>
+            </Tooltip>
+          )}
+          <Button size="small" onClick={onArchiveNow}>
+            {getMessage('archiveNow')}
+          </Button>
+        </Stack>
       </Stack>
     </Box>
   );

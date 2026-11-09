@@ -3,11 +3,20 @@ import { escapeOmniboxText, searchArchive } from '../core/searchArchive';
 import type { BackgroundMessage } from '../types';
 import { archiveIdleTabs } from './archiveIdleTabs';
 import { fillAlwaysPinnedTabs } from './fillAlwaysPinnedTabs';
+import {
+  enqueue,
+  handleMoved,
+  handlePinned,
+  handleRemoved,
+  handleUnpinned,
+  resetActivePinnedTab,
+} from './pinnedTabSync';
 
 export const ALARM_NAME = 'tab-archive-sweep';
 /** 何分ごとに見回るか */
 export const SWEEP_PERIOD_MINUTES = 10;
 const OMNIBOX_SUGGESTIONS = 8;
+export const COMMAND_RESET_PINNED_TAB = 'reset-pinned-tab';
 
 function ensureAlarm(): void {
   chrome.alarms.create(ALARM_NAME, { periodInMinutes: SWEEP_PERIOD_MINUTES });
@@ -19,7 +28,25 @@ export function registerBackground(): void {
 
   // 新しいウィンドウにも、設定した固定タブを出す
   chrome.windows.onCreated.addListener((win) => {
-    void fillAlwaysPinnedTabs(win);
+    void enqueue(async () => void (await fillAlwaysPinnedTabs(win)));
+  });
+
+  // 固定タブをウィンドウ間でそろえる（設定でオフにできる）
+  chrome.tabs.onUpdated.addListener((_tabId, changeInfo, tab) => {
+    if (changeInfo.pinned === true) void enqueue(() => handlePinned(tab));
+    if (changeInfo.pinned === false) void enqueue(() => handleUnpinned(tab));
+  });
+  chrome.tabs.onMoved.addListener((tabId) => {
+    void enqueue(() => handleMoved(tabId));
+  });
+  chrome.tabs.onRemoved.addListener((tabId) => {
+    void enqueue(() => handleRemoved(tabId));
+  });
+
+  // 固定タブを登録したときの URL に戻す（既定 ⌥⇧R）
+  chrome.commands.onCommand.addListener((command) => {
+    if (command === COMMAND_RESET_PINNED_TAB)
+      void enqueue(async () => void (await resetActivePinnedTab()));
   });
 
   chrome.alarms.onAlarm.addListener((alarm) => {

@@ -45,5 +45,11 @@
   },
   "alwaysPinnedCapture": { "message": "Use this window's pinned tabs (replace)" },
   "alwaysPinnedEmpty": { "message": "Nothing yet" },
-  "alwaysPinnedRemove": { "message": "Remove" }
+  "alwaysPinnedRemove": { "message": "Remove" },
+  "syncPinnedLabel": { "message": "Keep pinned tabs the same in every window" },
+  "syncPinnedHelp": {
+    "message": "While on, pinning, unpinning or reordering pinned tabs in one window does the same in the other windows. Closing a pinned tab only affects that window. When off, new windows don't get them either."
+  },
+  "syncPinnedShort": { "message": "Sync pinned" },
+  "commandResetPinnedTab": { "message": "Reset the pinned tab to its saved URL" }
 }

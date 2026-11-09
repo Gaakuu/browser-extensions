@@ -54,6 +54,15 @@ describe('fillAlwaysPinnedTabs', () => {
     expect(query).not.toHaveBeenCalled();
   });
 
+  it('固定タブの同期をオフにしていれば開かない', async () => {
+    storage = {
+      [SETTINGS_KEY]: { alwaysPinnedUrls: ['https://mail/'], syncPinnedTabs: false },
+    };
+
+    await expect(fillAlwaysPinnedTabs(win(), noWait)).resolves.toBe(0);
+    expect(create).not.toHaveBeenCalled();
+  });
+
   it('設定が空なら何もしない', async () => {
     storage = {};
 

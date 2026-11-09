@@ -79,8 +79,21 @@ export function SettingsForm({ settings, onChange, onCapturePinned }: SettingsFo
       <Typography variant="subtitle1" sx={{ mb: 1 }}>
         {getMessage('alwaysPinnedTitle')}
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
         {getMessage('alwaysPinnedHelp')}
+      </Typography>
+      <FormControlLabel
+        sx={{ mb: 1 }}
+        control={
+          <Switch
+            checked={settings.syncPinnedTabs}
+            onChange={(e) => onChange({ ...settings, syncPinnedTabs: e.target.checked })}
+          />
+        }
+        label={getMessage('syncPinnedLabel')}
+      />
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 2, ml: 6 }}>
+        {getMessage('syncPinnedHelp')}
       </Typography>
       <Button variant="outlined" size="small" onClick={onCapturePinned}>
         {getMessage('alwaysPinnedCapture')}

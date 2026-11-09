@@ -3,14 +3,17 @@ import { StrictMode, useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ArchivePopup } from '../../components/ArchivePopup';
 import { loadArchive, removeFromArchive } from '../../core/ArchiveStore';
+import { loadSettings, saveSettings } from '../../core/settings';
 import type { ArchivedTab, BackgroundMessage } from '../../types';
 
 function App() {
   const [entries, setEntries] = useState<ArchivedTab[]>([]);
   const [lastArchivedCount, setLastArchivedCount] = useState<number | null>(null);
+  const [syncPinned, setSyncPinned] = useState<boolean | undefined>(undefined);
 
   useEffect(() => {
     loadArchive().then(setEntries);
+    loadSettings().then((s) => setSyncPinned(s.syncPinnedTabs));
   }, []);
 
   return (
@@ -31,6 +34,11 @@ function App() {
         setEntries(await loadArchive());
       }}
       onOpenSettings={() => chrome.runtime.openOptionsPage()}
+      syncPinned={syncPinned}
+      onToggleSyncPinned={async (next) => {
+        setSyncPinned(next);
+        await saveSettings({ ...(await loadSettings()), syncPinnedTabs: next });
+      }}
     />
   );
 }

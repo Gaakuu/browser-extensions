@@ -20,6 +20,10 @@ export function normalizeSettings(raw: unknown): Settings {
           ),
         ]
       : DEFAULT_SETTINGS.alwaysPinnedUrls,
+    syncPinnedTabs:
+      typeof value.syncPinnedTabs === 'boolean'
+        ? value.syncPinnedTabs
+        : DEFAULT_SETTINGS.syncPinnedTabs,
   };
 }
 
