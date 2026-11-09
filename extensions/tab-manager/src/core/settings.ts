@@ -7,6 +7,7 @@ export const SETTINGS_KEY = 'settings';
 export function normalizeSettings(raw: unknown): Settings {
   const value = (typeof raw === 'object' && raw !== null ? raw : {}) as Partial<Settings>;
   const hours = Number(value.thresholdHours);
+  const resetMinutes = Number(value.resetPinnedAfterMinutes);
   return {
     thresholdHours: Number.isFinite(hours) && hours >= 0 ? hours : DEFAULT_SETTINGS.thresholdHours,
     archiveGroupedTabs:
@@ -24,6 +25,10 @@ export function normalizeSettings(raw: unknown): Settings {
       typeof value.syncPinnedTabs === 'boolean'
         ? value.syncPinnedTabs
         : DEFAULT_SETTINGS.syncPinnedTabs,
+    resetPinnedAfterMinutes:
+      Number.isFinite(resetMinutes) && resetMinutes >= 0
+        ? resetMinutes
+        : DEFAULT_SETTINGS.resetPinnedAfterMinutes,
   };
 }
 

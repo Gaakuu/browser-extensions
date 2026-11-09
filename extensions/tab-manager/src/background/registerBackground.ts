@@ -5,6 +5,8 @@ import { archiveIdleTabs } from './archiveIdleTabs';
 import { fillAlwaysPinnedTabs } from './fillAlwaysPinnedTabs';
 import {
   enqueue,
+  forgetLastSeen,
+  handleActivated,
   handleMoved,
   handlePinned,
   handleRemoved,
@@ -46,6 +48,12 @@ export function registerBackground(): void {
   });
   chrome.tabs.onRemoved.addListener((tabId) => {
     void enqueue(() => handleRemoved(tabId));
+    void enqueue(() => forgetLastSeen(tabId));
+  });
+
+  // しばらく見ていなかった固定タブに戻ってきたら、登録した URL に戻す
+  chrome.tabs.onActivated.addListener(({ tabId, windowId }) => {
+    void enqueue(async () => void (await handleActivated(tabId, windowId)));
   });
 
   // 固定タブを登録したときの URL に戻す（既定 ⌥⇧R）

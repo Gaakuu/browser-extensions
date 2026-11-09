@@ -15,7 +15,7 @@ import {
   Switch,
   Typography,
 } from '@mui/material';
-import { type Settings, THRESHOLD_CHOICES } from '../types';
+import { RESET_PINNED_CHOICES, type Settings, THRESHOLD_CHOICES } from '../types';
 import { getMessage } from '../utils/i18n';
 
 export function thresholdLabel(hours: number): string {
@@ -94,6 +94,28 @@ export function SettingsForm({ settings, onChange, onCapturePinned }: SettingsFo
       />
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2, ml: 6 }}>
         {getMessage('syncPinnedHelp')}
+      </Typography>
+      <FormControl fullWidth size="small" sx={{ mb: 1 }}>
+        <InputLabel id="reset-pinned-label">{getMessage('resetPinnedLabel')}</InputLabel>
+        <Select
+          labelId="reset-pinned-label"
+          label={getMessage('resetPinnedLabel')}
+          value={settings.resetPinnedAfterMinutes}
+          onChange={(e) =>
+            onChange({ ...settings, resetPinnedAfterMinutes: Number(e.target.value) })
+          }
+        >
+          {RESET_PINNED_CHOICES.map((minutes) => (
+            <MenuItem key={minutes} value={minutes}>
+              {minutes === 0
+                ? getMessage('resetPinnedOff')
+                : getMessage('resetPinnedMinutes', String(minutes))}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        {getMessage('resetPinnedHelp')}
       </Typography>
       <Button variant="outlined" size="small" onClick={onCapturePinned}>
         {getMessage('alwaysPinnedCapture')}

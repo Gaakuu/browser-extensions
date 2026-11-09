@@ -51,5 +51,14 @@
     "message": "While on, pinning, unpinning or reordering pinned tabs in one window does the same in the other windows. Closing a pinned tab only affects that window. When off, new windows don't get them either."
   },
   "syncPinnedShort": { "message": "Sync pinned" },
-  "commandResetPinnedTab": { "message": "Reset the pinned tab to its saved URL" }
+  "commandResetPinnedTab": { "message": "Reset the pinned tab to its saved URL" },
+  "resetPinnedLabel": { "message": "Reset pinned tabs to their saved URL" },
+  "resetPinnedOff": { "message": "Never" },
+  "resetPinnedMinutes": {
+    "message": "After $N$ min away",
+    "placeholders": { "n": { "content": "$1" } }
+  },
+  "resetPinnedHelp": {
+    "message": "When you switch back to a pinned tab you haven't looked at for a while, it reopens at its saved URL. Press ⌥⇧R to reset any time."
+  }
 }

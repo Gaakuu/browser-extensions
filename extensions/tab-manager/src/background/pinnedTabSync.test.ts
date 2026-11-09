@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { SETTINGS_KEY } from '../core/settings';
 import {
+  handleActivated,
   handleMoved,
   handlePinned,
   handleRemoved,
@@ -72,7 +73,8 @@ function setup(list: string[], sync = true) {
         },
       },
       session: {
-        get: async (key: string) => ({ [key]: session[key] }),
+        get: async (key: string | string[]) =>
+          Object.fromEntries((Array.isArray(key) ? key : [key]).map((k) => [k, session[k]])),
         set: async (items: Record<string, unknown>) => {
           Object.assign(session, items);
         },
@@ -252,5 +254,48 @@ describe('resetActivePinnedTab', () => {
 
   it('固定タブでなければ何もしない', async () => {
     await expect(resetActivePinnedTab()).resolves.toBe(false);
+  });
+});
+
+describe('handleActivated', () => {
+  const MIN = 60 * 1000;
+  beforeEach(twoSyncedWindows);
+
+  const mail = () => tabs.find((x) => x.windowId === 1 && x.url.startsWith(MAIL)) as FakeTab;
+  const newtab = () => tabs.find((x) => x.windowId === 1 && !x.pinned) as FakeTab;
+
+  /** Gmail を見て、別のタブに移り、elapsed 分後に Gmail に戻る */
+  async function leaveAndReturn(elapsedMinutes: number) {
+    await handleActivated(mail().id, 1, 0);
+    mail().url = 'https://mail/#inbox/123';
+    await handleActivated(newtab().id, 1, 1 * MIN);
+    return handleActivated(mail().id, 1, (1 + elapsedMinutes) * MIN);
+  }
+
+  it('しばらく（既定 30 分）見ていなかった固定タブに戻ったら、登録した URL に戻す', async () => {
+    await expect(leaveAndReturn(30)).resolves.toBe(true);
+    expect(mail().url).toBe(MAIL);
+  });
+
+  it('すぐ戻ってきたときはそのまま', async () => {
+    await expect(leaveAndReturn(10)).resolves.toBe(false);
+    expect(mail().url).toBe('https://mail/#inbox/123');
+  });
+
+  it('設定で「戻さない」にしていれば戻さない', async () => {
+    (local[SETTINGS_KEY] as { resetPinnedAfterMinutes: number }).resetPinnedAfterMinutes = 0;
+    await expect(leaveAndReturn(120)).resolves.toBe(false);
+  });
+
+  it('前に見た時刻が分からない固定タブ（起動し直した直後など）は戻さない', async () => {
+    mail().url = 'https://mail/#inbox/123';
+    await expect(handleActivated(mail().id, 1, 999 * MIN)).resolves.toBe(false);
+    expect(mail().url).toBe('https://mail/#inbox/123');
+  });
+
+  it('固定していないタブは戻さない', async () => {
+    await handleActivated(newtab().id, 1, 0);
+    await handleActivated(mail().id, 1, 1 * MIN);
+    await expect(handleActivated(newtab().id, 1, 120 * MIN)).resolves.toBe(false);
   });
 });

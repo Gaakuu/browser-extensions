@@ -80,3 +80,16 @@ export function insertIndex(list: string[], slotsInWindow: string[], slot: strin
 export function sameOrder(a: string[], b: string[]): boolean {
   return a.length === b.length && a.every((v, i) => v === b[i]);
 }
+
+/**
+ * 固定タブに戻ってきたとき、登録した URL に戻すか。
+ * 前に見ていた時刻（lastSeen）が分からないときは戻さない（Chrome を起動し直した直後など）。
+ */
+export function shouldResetPinned(
+  lastSeen: number | undefined,
+  now: number,
+  afterMinutes: number,
+): boolean {
+  if (afterMinutes <= 0 || lastSeen === undefined) return false;
+  return now - lastSeen >= afterMinutes * 60 * 1000;
+}

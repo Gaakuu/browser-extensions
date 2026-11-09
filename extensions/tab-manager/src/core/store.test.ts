@@ -107,12 +107,14 @@ describe('settings', () => {
         archiveGroupedTabs: true,
         alwaysPinnedUrls: ['https://mail.google.com/', 'https://calendar.google.com/'],
         syncPinnedTabs: false,
+        resetPinnedAfterMinutes: 60,
       }),
     ).toEqual({
       thresholdHours: 12,
       archiveGroupedTabs: true,
       alwaysPinnedUrls: ['https://mail.google.com/', 'https://calendar.google.com/'],
       syncPinnedTabs: false,
+      resetPinnedAfterMinutes: 60,
     });
   });
 
@@ -120,6 +122,7 @@ describe('settings', () => {
     expect(DEFAULT_SETTINGS.thresholdHours).toBe(18);
     expect(DEFAULT_SETTINGS.alwaysPinnedUrls).toEqual([]);
     expect(DEFAULT_SETTINGS.syncPinnedTabs).toBe(true);
+    expect(DEFAULT_SETTINGS.resetPinnedAfterMinutes).toBe(30);
   });
 
   it('常に出す固定タブの URL は、文字列でないものと重なりを落とす', () => {

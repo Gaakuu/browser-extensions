@@ -51,5 +51,14 @@
     "message": "オンの間は、どこかのウィンドウで固定・固定解除・並べ替えをすると、ほかのウィンドウにも同じようにします。閉じたときはそのウィンドウだけです。オフにすると、新しいウィンドウにも開きません。"
   },
   "syncPinnedShort": { "message": "固定タブの同期" },
-  "commandResetPinnedTab": { "message": "固定タブを登録したときの URL に戻す" }
+  "commandResetPinnedTab": { "message": "固定タブを登録したときの URL に戻す" },
+  "resetPinnedLabel": { "message": "固定タブを元の URL に戻す" },
+  "resetPinnedOff": { "message": "戻さない" },
+  "resetPinnedMinutes": {
+    "message": "$N$ 分見ていなかったら",
+    "placeholders": { "n": { "content": "$1" } }
+  },
+  "resetPinnedHelp": {
+    "message": "しばらく見ていなかった固定タブに切り替えたとき、登録した URL で開き直します（Gmail のスレッドを開いたまま離れても、次は受信トレイから）。⌥⇧R でいつでも戻せます。"
+  }
 }

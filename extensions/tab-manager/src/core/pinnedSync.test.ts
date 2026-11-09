@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { assignSlots, insertIndex, insertSlot, reorderSlots, sameOrder } from './pinnedSync';
+import {
+  assignSlots,
+  insertIndex,
+  insertSlot,
+  reorderSlots,
+  sameOrder,
+  shouldResetPinned,
+} from './pinnedSync';
 
 const tab = (id: number, index: number, url: string): chrome.tabs.Tab =>
   ({ id, index, url, pinned: true, windowId: 1 }) as chrome.tabs.Tab;
@@ -62,5 +69,18 @@ describe('sameOrder', () => {
   it('並びまで同じときだけ true', () => {
     expect(sameOrder([MAIL, CAL], [MAIL, CAL])).toBe(true);
     expect(sameOrder([MAIL, CAL], [CAL, MAIL])).toBe(false);
+  });
+});
+
+describe('shouldResetPinned', () => {
+  const MIN = 60 * 1000;
+  it('決めた分数以上見ていなければ戻す', () => {
+    expect(shouldResetPinned(0, 30 * MIN, 30)).toBe(true);
+    expect(shouldResetPinned(0, 29 * MIN, 30)).toBe(false);
+  });
+
+  it('前に見た時刻が分からない、または 0 分（戻さない）なら戻さない', () => {
+    expect(shouldResetPinned(undefined, 999 * MIN, 30)).toBe(false);
+    expect(shouldResetPinned(0, 999 * MIN, 0)).toBe(false);
   });
 });

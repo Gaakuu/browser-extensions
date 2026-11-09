@@ -19,6 +19,8 @@ export interface Settings {
   alwaysPinnedUrls: string[];
   /** 固定タブをウィンドウ間でそろえるか（固定・固定解除・並べ替え・新しいウィンドウ） */
   syncPinnedTabs: boolean;
+  /** 固定タブをこの分数以上見ていなかったら、戻ってきたときに登録した URL に戻す。0 は戻さない */
+  resetPinnedAfterMinutes: number;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -27,9 +29,13 @@ export const DEFAULT_SETTINGS: Settings = {
   archiveGroupedTabs: false,
   alwaysPinnedUrls: [],
   syncPinnedTabs: true,
+  resetPinnedAfterMinutes: 30,
 };
 
 /** 選べる時間（Arc の選択肢に 1 時間と 18 時間を足したもの） */
 export const THRESHOLD_CHOICES = [0, 1, 12, 18, 24, 24 * 7, 24 * 30] as const;
+
+/** 固定タブを元の URL に戻すまでの分数の選択肢（0 は戻さない） */
+export const RESET_PINNED_CHOICES = [0, 15, 30, 60, 120] as const;
 
 export type BackgroundMessage = { type: 'ARCHIVE_NOW' };

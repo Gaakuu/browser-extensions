@@ -6,9 +6,13 @@ import {
   type PinnedEntry,
   reorderSlots,
   sameOrder,
+  shouldResetPinned,
 } from '../core/pinnedSync';
 import { loadSettings, saveSettings } from '../core/settings';
 import { deleteSlots, loadSlotMap, setSlots } from './slotMap';
+
+const SEEN_KEY = 'tabLastSeen';
+const ACTIVE_KEY = 'activeTabByWindow';
 
 /*
  * 固定タブをウィンドウ間でそろえる。
@@ -210,10 +214,9 @@ export async function handleRemoved(tabId: number): Promise<void> {
   await deleteSlots([tabId]);
 }
 
-/** 今の固定タブを、登録したときの URL に開き直す */
-export async function resetActivePinnedTab(): Promise<boolean> {
-  const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
-  if (!tab?.pinned || tab.id == null) return false;
+/** 固定タブを、登録したときの URL に開き直す */
+async function resetPinnedTab(tab: chrome.tabs.Tab): Promise<boolean> {
+  if (!tab.pinned || tab.id == null) return false;
   const { alwaysPinnedUrls } = await loadSettings();
   const slot = (await pinnedEntries(tab.windowId, alwaysPinnedUrls)).find(
     (e) => e.tab.id === tab.id,
@@ -221,4 +224,51 @@ export async function resetActivePinnedTab(): Promise<boolean> {
   if (!slot) return false;
   if (tab.url !== slot) await chrome.tabs.update(tab.id, { url: slot });
   return true;
+}
+
+/** 今の固定タブを、登録したときの URL に開き直す（⌥⇧R） */
+export async function resetActivePinnedTab(): Promise<boolean> {
+  const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+  return tab ? resetPinnedTab(tab) : false;
+}
+
+/**
+ * タブが前に出た。直前に出ていたタブと、今出たタブの「最後に見た時刻」を記録し、
+ * しばらく見ていなかった固定タブなら登録した URL に戻す。戻したら true。
+ * Chrome の lastAccessed はこのイベントの時点でもう今の時刻になっていることがあるので、自分で記録する。
+ */
+export async function handleActivated(
+  tabId: number,
+  windowId: number,
+  now = Date.now(),
+): Promise<boolean> {
+  const stored = await chrome.storage.session.get([SEEN_KEY, ACTIVE_KEY]);
+  const seen = (stored[SEEN_KEY] as Record<string, number> | undefined) ?? {};
+  const active = (stored[ACTIVE_KEY] as Record<string, number> | undefined) ?? {};
+
+  const previous = active[String(windowId)];
+  if (previous !== undefined && previous !== tabId) seen[String(previous)] = now;
+  const lastSeen = seen[String(tabId)];
+  seen[String(tabId)] = now;
+  active[String(windowId)] = tabId;
+  await chrome.storage.session.set({ [SEEN_KEY]: seen, [ACTIVE_KEY]: active });
+
+  const { resetPinnedAfterMinutes } = await loadSettings();
+  if (!shouldResetPinned(lastSeen, now, resetPinnedAfterMinutes)) return false;
+  let tab: chrome.tabs.Tab;
+  try {
+    tab = await chrome.tabs.get(tabId);
+  } catch {
+    return false;
+  }
+  return resetPinnedTab(tab);
+}
+
+/** 閉じたタブの「最後に見た時刻」を消す */
+export async function forgetLastSeen(tabId: number): Promise<void> {
+  const stored = await chrome.storage.session.get(SEEN_KEY);
+  const seen = (stored[SEEN_KEY] as Record<string, number> | undefined) ?? {};
+  if (!(String(tabId) in seen)) return;
+  delete seen[String(tabId)];
+  await chrome.storage.session.set({ [SEEN_KEY]: seen });
 }
