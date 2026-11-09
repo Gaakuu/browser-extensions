@@ -31,7 +31,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @browser-extensions/tab-switcher exec wxt prepare
       - run: pnpm --filter @browser-extensions/screenshot exec wxt prepare
-      - run: pnpm --filter @browser-extensions/tab-archive exec wxt prepare
+      - run: pnpm --filter @browser-extensions/tab-manager exec wxt prepare
       - run: pnpm --filter @browser-extensions/copy-url exec wxt prepare
       - run: pnpm --filter @browser-extensions/tab-switcher exec playwright install chromium
       - run: pnpm --filter @browser-extensions/screenshot exec playwright install chromium

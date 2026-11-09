@@ -122,7 +122,7 @@ importers:
         specifier: ~0.19.29
         version: 0.19.29(@types/node@26.6.6)(rollup@4.60.1)(tsx@4.23.15)
 
-  extensions/tab-archive:
+  extensions/tab-manager:
     dependencies:
       '@browser-extensions/shared':
         specifier: workspace:*

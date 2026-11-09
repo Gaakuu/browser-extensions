@@ -1,7 +1,7 @@
 {
-  "extName": { "message": "Tab Archive" },
+  "extName": { "message": "Tab Manager" },
   "extDescription": {
-    "message": "Automatically closes tabs you haven't viewed for a while and keeps them searchable (like Arc's auto-archive)"
+    "message": "Keeps pinned tabs the same in every window, and closes tabs you haven't viewed for a while while keeping them searchable (like Arc)"
   },
   "actionTitle": { "message": "Archived tabs" },
   "searchPlaceholder": { "message": "Search archived tabs..." },
@@ -18,7 +18,7 @@
     "message": "Archived $COUNT$ tabs",
     "placeholders": { "count": { "content": "$1" } }
   },
-  "optionsTitle": { "message": "Tab Archive settings" },
+  "optionsTitle": { "message": "Tab Manager settings" },
   "optionsDescription": {
     "message": "Unpinned tabs you haven't viewed for a while are closed automatically and kept here. The active tab and tabs playing audio are never closed."
   },

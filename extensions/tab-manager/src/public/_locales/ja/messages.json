@@ -1,7 +1,7 @@
 {
-  "extName": { "message": "Tab Archive" },
+  "extName": { "message": "Tab Manager" },
   "extDescription": {
-    "message": "しばらく見ていないタブを自動で閉じて残す（Arc の自動アーカイブの代わり）"
+    "message": "固定タブをどのウィンドウでもそろえ、しばらく見ていないタブを自動で閉じて残す（Arc の代わり）"
   },
   "actionTitle": { "message": "アーカイブしたタブ" },
   "searchPlaceholder": { "message": "閉じたタブを検索..." },
@@ -18,7 +18,7 @@
     "message": "$COUNT$ 件を閉じました",
     "placeholders": { "count": { "content": "$1" } }
   },
-  "optionsTitle": { "message": "Tab Archive の設定" },
+  "optionsTitle": { "message": "Tab Manager の設定" },
   "optionsDescription": {
     "message": "ピン留めしていないタブを、見ていない時間が長くなったら自動で閉じ、ここに残します。表示中のタブ・音が出ているタブは閉じません。"
   },

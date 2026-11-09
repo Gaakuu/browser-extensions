@@ -25,7 +25,7 @@ let queue: Promise<void> = Promise.resolve();
 /** 処理を1つずつ順に流す（同時に動くと一覧の読み書きが食い違う） */
 export function enqueue(task: () => Promise<void>): Promise<void> {
   queue = queue.then(task).catch((error) => {
-    console.warn('[tab-archive] pinned tab sync failed', error);
+    console.warn('[tab-manager] pinned tab sync failed', error);
   });
   return queue;
 }
