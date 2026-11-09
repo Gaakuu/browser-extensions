@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## プロジェクト概要
 
-pnpm workspaces + Turbo によるモノレポ構成の Chrome 拡張機能開発リポジトリ。メインの拡張機能は **Tab Switcher** — VSCode 風の MRU（最近使用した順）タブ切り替えツール。WXT、React 19、MUI 9、Shadow DOM オーバーレイで構築。
+pnpm workspaces + Turbo によるモノレポ構成の Chrome 拡張機能開発リポジトリ。メインの拡張機能は **Tab Switcher** — VSCode 風の MRU（最近使用した順）タブ切り替えツール。WXT、React 19、MUI 9 で構築し、ツールバーのパネル（action popup）に表示する。
 
 ## コマンド
 
@@ -33,6 +33,7 @@ cd extensions/tab-switcher && npx vitest run src/utils/fuzzyMatch.test.ts
 ### ワークスペース構成
 
 - `extensions/tab-switcher/` — メイン拡張機能（WXT + React）
+- `extensions/copy-url/` — 今のタブの URL をコピーする（⌘⇧C を chrome://extensions/shortcuts で割り当てる。Chrome 本体のキーと重なるので自動では割り当たらない）
 - `extensions/sample/` — 最小構成のサンプル拡張機能
 - `packages/shared/` — Chrome ストレージユーティリティ（`getStorageItem`, `setStorageItem`）
 - `packages/ui/` — MUI ダーク/ライトテーマ、ThemeProvider、CssBaseline の再エクスポート
@@ -40,27 +41,25 @@ cd extensions/tab-switcher && npx vitest run src/utils/fuzzyMatch.test.ts
 ### Tab Switcher 拡張機能
 
 **エントリポイント**（WXT 規約に従い `src/entrypoints/` に配置）:
-- `background.ts` — Service Worker。`TabHistoryManager` を初期化し、Chrome タブイベントの監視、キーボードコマンドの処理、Content Script へのメッセージルーティングを行う。
-- `content.ts` — Content Script。Shadow DOM 内に `OverlayManager` を生成し、スイッチャー/検索オーバーレイを表示。`KeyboardHandler` でキーボード入力を処理。
+- `popup/` — ツールバーのパネル。`_execute_action`（⌘⇧Space）で開く。MRU 一覧と検索を兼ねる
+- `background.ts` — Service Worker。タブのアクティブ化を MRU に記録し、`previous-tab`（直前のタブへ）と `search-tabs`（検索モードでパネルを開く）のコマンドを処理する
+- `options/` — ショートカットの案内
 
-**Background → Content メッセージ**: `SHOW_SWITCHER`, `SHOW_SEARCH`, `TAB_CLOSED`, `MOVE_FOCUS_DOWN`
-**Content → Background メッセージ**: `SWITCH_TO_TAB`, `CLOSE_TAB`, `GET_ALL_TABS`, `OVERLAY_CLOSED`
-
-**主要クラス**:
-- `TabHistoryManager`（`src/background/`）— タブの MRU タイムスタンプを管理
-- `OverlayManager`（`src/content/`）— Shadow DOM + React + Emotion キャッシュによる CSS 分離オーバーレイ
-- `KeyboardHandler`（`src/content/`）— 修飾キー（Cmd/Ctrl）のリリース検出でスイッチャー確定
-
-**React コンポーネント**（`src/components/`）:
-- `TabSwitcher` — MRU リスト + キーボードナビゲーション。`onReady` コールバックでハンドルを公開
-- `SearchOverlay` — `fzf` ライブラリによるファジー検索。テキスト入力に自動フォーカス
-- `TabCard` — タブリストアイテム。favicon とマッチ範囲のハイライト表示
+**主要モジュール**:
+- `core/mru.ts` — MRU の並べ替え（純粋関数）。拡張が見たアクティブ化の順 → 未記録のタブは `tab.lastAccessed`
+- `core/MruStore.ts` — MRU の順番を `chrome.storage.session` に置く（Service Worker が止まっても消えない）
+- `core/holdToConfirm.ts` — 修飾キーを押したまま開き、離したら確定する判定
+- `components/TabSwitcherPopup.tsx` — 一覧・検索（`fzf`）・キーボード操作
 
 ### 主要な設計判断
 
-- **Shadow DOM 分離**: ホストページとの CSS 競合を防ぐため、オーバーレイを Shadow DOM 内にレンダリング。Emotion キャッシュを Shadow Root に注入。
-- **修飾キーリリースで確定**: スイッチャーモードでは修飾キー（Cmd/Ctrl）を離すと選択確定。VSCode の Ctrl+Tab 動作を再現。
-- **メッセージベースの疎結合**: Background と Content Script 間の通信は型付き Chrome メッセージのみ（`src/types/messages.ts`）。
+- **Content Script を使わない**: chrome:// ・新しいタブ・ウェブストアでは差し込めないため、どのページでも動くツールバーのパネルにした。別ウィンドウは使わない
+- **状態は storage.session**: MV3 の Service Worker は 30 秒ほどで止まるので、メモリに MRU を持たない
+- **修飾キーリリースで確定**: パネル内で押していない修飾キーの keyup を「押したまま開いた」とみなし、すべて離したら確定。文字を打ったら確定しない
+
+### Node のバージョン
+
+jsdom 29 のため Node 22.13 以上が要る。ルートの `package.json` で Volta が 22.22 に固定している。Volta の pnpm を使うときは `VOLTA_FEATURE_PNPM=1` を付けると固定した Node でスクリプトが動く。
 
 ## 技術スタック
 

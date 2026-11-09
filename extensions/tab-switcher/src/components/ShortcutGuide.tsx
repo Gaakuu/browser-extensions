@@ -29,7 +29,7 @@ export interface OverrideEntry {
 }
 
 export const OVERRIDE_ENTRIES: OverrideEntry[] = [
-  { commandName: 'show-tab-switcher', keybinding: 'Ctrl+Tab', label: 'Tab Switcher → Ctrl+Tab' },
+  { commandName: '_execute_action', keybinding: 'Ctrl+Tab', label: 'Tab Switcher → Ctrl+Tab' },
   { commandName: 'search-tabs', keybinding: 'Ctrl+P', label: 'Search Tabs → Ctrl+P (Cmd+P)' },
 ];
 

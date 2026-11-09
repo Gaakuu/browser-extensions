@@ -1,5 +1,5 @@
 import { Fzf } from 'fzf';
-import type { TabInfo } from '../types/messages';
+import type { TabInfo } from '../types/tabs';
 
 export interface MatchRange {
   start: number;
@@ -43,15 +43,9 @@ export function fuzzySearchTabs(query: string, tabs: TabInfo[]): FuzzyMatchResul
   const titleFzf = new Fzf(tabs, { selector: (tab) => tab.title });
   const titleResults = titleFzf.find(query);
 
-  // URLで検索（クエリパラメータを除外）
-  const stripQuery = (url: string) => {
-    try {
-      const u = new URL(url);
-      return u.origin + u.pathname;
-    } catch {
-      return url;
-    }
-  };
+  // URLで検索（クエリとハッシュを除外）。ハイライト位置がずれないよう、元の URL の先頭部分を使う
+  // （new URL の origin は chrome:// などで "null" になるため使わない）
+  const stripQuery = (url: string) => url.split(/[?#]/)[0];
   const urlFzf = new Fzf(tabs, { selector: (tab) => stripQuery(tab.url) });
   const urlResults = urlFzf.find(query);
 

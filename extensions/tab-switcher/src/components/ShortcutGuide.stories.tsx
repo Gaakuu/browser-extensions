@@ -33,8 +33,8 @@ export const NoShortcutsSet: Story = {
     const original = chrome.commands.getAll;
     chrome.commands.getAll = (() =>
       Promise.resolve([
-        { name: 'show-tab-switcher', shortcut: '', description: 'タブ切り替えオーバーレイを表示' },
-        { name: 'search-tabs', shortcut: '', description: 'タブ検索オーバーレイを表示' },
+        { name: '_execute_action', shortcut: '', description: 'タブ切り替えを開く' },
+        { name: 'search-tabs', shortcut: '', description: 'タブ切り替えを検索モードで開く' },
       ])) as typeof chrome.commands.getAll;
     return () => {
       chrome.commands.getAll = original;

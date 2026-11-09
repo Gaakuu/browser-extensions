@@ -24,6 +24,12 @@ export default defineConfig({
       'debugger',
       'storage',
     ],
+    // 入れる前から開いていたタブにも Content Script を差し込めるように（Content Script と同じ範囲）
+    host_permissions: ['<all_urls>'],
+    // アイコンを押しても撮れるようにし、撮れないページではバッジで知らせる
+    action: {
+      default_title: '__MSG_commandCaptureScreenshot__',
+    },
     commands: {
       'capture-screenshot': {
         suggested_key: {

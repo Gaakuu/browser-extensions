@@ -3,13 +3,13 @@
     "message": "Tab Switcher"
   },
   "extDescription": {
-    "message": "MRU順タブスイッチャー"
+    "message": "ツールバーのパネルから、最近使った順にタブを切り替える。chrome:// や新しいタブを含むすべてのページで動く"
   },
   "commandShowTabSwitcher": {
-    "message": "タブ切り替えオーバーレイを表示"
+    "message": "タブ切り替えを開く（修飾キーを押したまま選び、離すと切り替え）"
   },
   "commandSearchTabs": {
-    "message": "タブ検索オーバーレイを表示"
+    "message": "タブ切り替えを検索モードで開く"
   },
   "searchPlaceholder": {
     "message": "タブを検索..."
@@ -88,5 +88,11 @@
   },
   "devtoolsShortcutOther": {
     "message": "Ctrl+Shift+J"
+  },
+  "commandPreviousTab": {
+    "message": "直前のタブにすぐ戻る"
+  },
+  "popupHint": {
+    "message": "↑↓ / Tab: 移動 · Enter か修飾キーを離す: 切り替え · ⌘/Ctrl+⌫: タブを閉じる · Esc: やめる"
   }
 }

@@ -15,15 +15,26 @@ export default defineConfig({
     name: '__MSG_extName__',
     description: '__MSG_extDescription__',
     default_locale: 'en',
-    permissions: ['tabs', 'scripting'],
-    host_permissions: ['<all_urls>'],
+    // tabs: タイトルと URL を読む / storage: MRU の順番を session に置く / favicon: chrome:// などのアイコン
+    // Content Script は使わない（chrome:// や新しいタブでは差し込めず、動かなかったため）
+    permissions: ['tabs', 'storage', 'favicon'],
+    action: {
+      default_title: '__MSG_extName__',
+    },
     commands: {
-      'show-tab-switcher': {
+      _execute_action: {
         suggested_key: {
           default: 'Ctrl+Shift+Space',
           mac: 'Command+Shift+Space',
         },
         description: '__MSG_commandShowTabSwitcher__',
+      },
+      'previous-tab': {
+        suggested_key: {
+          default: 'Alt+Q',
+          mac: 'MacCtrl+Q',
+        },
+        description: '__MSG_commandPreviousTab__',
       },
       'search-tabs': {
         suggested_key: {
