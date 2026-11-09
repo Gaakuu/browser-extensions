@@ -65,6 +65,22 @@ describe('TabSwitcherPopup', () => {
     expect(screen.queryByText('GitHub')).not.toBeInTheDocument();
   });
 
+  it('何も打っていなければ今のウィンドウだけ、打つとほかのウィンドウのタブからも探す', () => {
+    const props = { onSwitch: vi.fn(), onCloseTab: vi.fn(), onDismiss: vi.fn() };
+    const otherTabs: TabInfo[] = [
+      { id: 9, windowId: 2, index: 0, title: 'Jira', url: 'https://jira.example', favIconUrl: '' },
+    ];
+    render(<TabSwitcherPopup tabs={tabs} otherTabs={otherTabs} mode="search" {...props} />);
+    expect(screen.queryByText('Jira')).not.toBeInTheDocument();
+
+    fireEvent.change(screen.getByTestId('search-input'), { target: { value: 'jira' } });
+    expect(screen.getByText('Jira')).toBeInTheDocument();
+    expect(screen.getByTestId('tab-card-9')).toHaveTextContent('otherWindow');
+
+    fireEvent.keyDown(window, { key: 'Enter' });
+    expect(props.onSwitch).toHaveBeenCalledWith(9);
+  });
+
   it('Esc で閉じる', () => {
     const { onDismiss } = setup();
     fireEvent.keyDown(window, { key: 'Escape' });

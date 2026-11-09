@@ -3,10 +3,16 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { TabSwitcherPopup } from '../../components/TabSwitcherPopup';
 import { takePendingMode } from '../../core/MruStore';
-import { getWindowTabsByMru } from '../../core/windowTabs';
+import { getOtherWindowTabsByMru, getWindowTabsByMru, switchToTab } from '../../core/windowTabs';
 
 async function main() {
-  const [tabs, pendingMode] = await Promise.all([getWindowTabsByMru(), takePendingMode()]);
+  const current = await chrome.windows.getCurrent();
+  const currentWindowId = current.id as number;
+  const [tabs, otherTabs, pendingMode] = await Promise.all([
+    getWindowTabsByMru(currentWindowId),
+    getOtherWindowTabsByMru(currentWindowId),
+    takePendingMode(),
+  ]);
 
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
@@ -14,9 +20,10 @@ async function main() {
         <CssBaseline />
         <TabSwitcherPopup
           tabs={tabs}
+          otherTabs={otherTabs}
           mode={pendingMode ?? 'switcher'}
           onSwitch={async (tabId) => {
-            await chrome.tabs.update(tabId, { active: true });
+            await switchToTab(tabId, currentWindowId);
             window.close();
           }}
           onCloseTab={(tabId) => {

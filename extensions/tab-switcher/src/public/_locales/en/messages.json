@@ -93,6 +93,9 @@
     "message": "Switch to the previous tab instantly"
   },
   "popupHint": {
-    "message": "↑↓ / Tab: move · Enter or release the modifier: switch · ⌘/Ctrl+⌫: close tab · Esc: cancel"
+    "message": "↑↓ / Tab: move · Enter or release the modifier: switch · type to search all windows · ⌘/Ctrl+⌫: close tab · Esc: cancel"
+  },
+  "otherWindow": {
+    "message": "Other window"
   }
 }

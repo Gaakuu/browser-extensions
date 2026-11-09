@@ -11,6 +11,8 @@ interface TabCardProps {
   onClose: () => void;
   highlights?: MatchRange[];
   highlightField?: 'title' | 'url';
+  /** ほかのウィンドウのタブ（選ぶと今のウィンドウに持ってくる） */
+  inOtherWindow?: boolean;
 }
 
 function highlightText(text: string, ranges?: MatchRange[]): React.ReactNode {
@@ -37,7 +39,15 @@ function highlightText(text: string, ranges?: MatchRange[]): React.ReactNode {
   return <>{parts}</>;
 }
 
-export function TabCard({ tab, isFocused, onSelect, onClose, highlights, highlightField }: TabCardProps) {
+export function TabCard({
+  tab,
+  isFocused,
+  onSelect,
+  onClose,
+  highlights,
+  highlightField,
+  inOtherWindow,
+}: TabCardProps) {
   const titleHighlights = highlightField === 'title' ? highlights : undefined;
   const urlHighlights = highlightField === 'url' ? highlights : undefined;
 
@@ -66,6 +76,7 @@ export function TabCard({ tab, isFocused, onSelect, onClose, highlights, highlig
             component="div"
             sx={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis' }}
           >
+            {inOtherWindow && `${getMessage('otherWindow')} · `}
             {highlightText(tab.url, urlHighlights)}
           </Typography>
         }
