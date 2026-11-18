@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { SETTINGS_KEY } from '../core/settings';
+import { fillAlwaysPinnedTabs } from './fillAlwaysPinnedTabs';
 import {
   handleActivated,
   handleMoved,
@@ -164,6 +165,31 @@ describe('handlePinned', () => {
     expect(pinnedUrls(1).filter((u) => u === JIRA)).toHaveLength(1);
   });
 
+  it('そのウィンドウでだけ閉じた固定タブを、少し違う URL で固定し直しても、ほかのウィンドウに重ねて開かない', async () => {
+    const mail2 = tabs.find((x) => x.windowId === 2 && x.url === MAIL) as FakeTab;
+    tabs = tabs.filter((x) => x !== mail2);
+    await handleRemoved(mail2.id);
+    const t = addTab(2, `${MAIL}#inbox/123`, true);
+
+    await handlePinned({ ...t } as chrome.tabs.Tab);
+
+    expect(settings().alwaysPinnedUrls).toEqual([MAIL, CAL]);
+    expect(pinnedUrls(1)).toEqual([MAIL, CAL]);
+    expect(pinnedUrls(2)).toEqual([CAL, `${MAIL}#inbox/123`]);
+  });
+
+  it('2つのウィンドウで続けて同じページを固定しても、1ウィンドウに1つ', async () => {
+    const a = addTab(1, JIRA, true);
+    const b = addTab(2, JIRA, true);
+
+    await handlePinned({ ...a } as chrome.tabs.Tab);
+    await handlePinned({ ...b } as chrome.tabs.Tab);
+
+    expect(settings().alwaysPinnedUrls).toEqual([MAIL, CAL, JIRA]);
+    expect(pinnedUrls(1).filter((u) => u === JIRA)).toHaveLength(1);
+    expect(pinnedUrls(2).filter((u) => u === JIRA)).toHaveLength(1);
+  });
+
   it('同期をオフにしていれば何もしない', async () => {
     (local[SETTINGS_KEY] as { syncPinnedTabs: boolean }).syncPinnedTabs = false;
     const t = addTab(1, JIRA, true);
@@ -297,5 +323,45 @@ describe('handleActivated', () => {
     await handleActivated(newtab().id, 1, 0);
     await handleActivated(mail().id, 1, 1 * MIN);
     await expect(handleActivated(newtab().id, 1, 120 * MIN)).resolves.toBe(false);
+  });
+});
+
+describe('fillAlwaysPinnedTabs（ウィンドウ間の同期と合わせて）', () => {
+  const NEW_WIN = { id: 4, type: 'normal', incognito: false };
+  beforeEach(async () => {
+    await twoSyncedWindows();
+    windows.push(NEW_WIN);
+    return () => {
+      windows.splice(windows.indexOf(NEW_WIN), 1);
+    };
+  });
+
+  it('新しいウィンドウの「開いた」が続けて来ても、固定タブは1つずつ', async () => {
+    addTab(4, 'chrome://newtab/', false, true);
+
+    await fillAlwaysPinnedTabs(NEW_WIN as chrome.windows.Window, noWait);
+    await fillAlwaysPinnedTabs(NEW_WIN as chrome.windows.Window, noWait);
+
+    expect(pinnedUrls(4)).toEqual([MAIL, CAL]);
+  });
+
+  it('Chrome を起動し直して固定タブが戻ってきたウィンドウには足さない（表が空でも）', async () => {
+    addTab(4, `${MAIL}#inbox/123`, true);
+    addTab(4, CAL, true);
+
+    await expect(fillAlwaysPinnedTabs(NEW_WIN as chrome.windows.Window, noWait)).resolves.toBe(0);
+    expect(pinnedUrls(4)).toEqual([`${MAIL}#inbox/123`, CAL]);
+  });
+
+  it('新しいウィンドウに開いた固定タブの「固定した」が来ても、ほかのウィンドウに重ねて開かない', async () => {
+    addTab(4, 'chrome://newtab/', false, true);
+    await fillAlwaysPinnedTabs(NEW_WIN as chrome.windows.Window, noWait);
+
+    for (const t of tabs.filter((x) => x.windowId === 4 && x.pinned)) {
+      await handlePinned({ ...t } as chrome.tabs.Tab);
+    }
+
+    expect(settings().alwaysPinnedUrls).toEqual([MAIL, CAL]);
+    for (const w of [1, 2, 4]) expect(pinnedUrls(w)).toEqual([MAIL, CAL]);
   });
 });

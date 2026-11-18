@@ -109,6 +109,11 @@ export async function handlePinned(tab: chrome.tabs.Tab): Promise<void> {
     await setSlots([[tab.id, url]]);
     return;
   }
+  // このウィンドウに無い slot と、URL かホストが同じなら、その slot を固定し直したものとみなす
+  // （そのウィンドウでだけ閉じた Gmail を、開き直して固定したときなど）。新しい slot にすると、
+  // ほかのウィンドウに同じページがもう1つずつ開いてしまう
+  const again = (await pinnedEntries(tab.windowId, list)).find((e) => e.tab.id === tab.id)?.slot;
+  if (again) return;
 
   const entries = await pinnedEntries(tab.windowId, list, tab.id);
   const pos = entries.findIndex((e) => e.tab.id === tab.id);
@@ -122,6 +127,8 @@ export async function handlePinned(tab: chrome.tabs.Tab): Promise<void> {
 
   for (const win of await otherWindows(tab.windowId)) {
     const others = await pinnedEntries(win.id as number, next);
+    // そのウィンドウにもう同じページの固定タブがある（ほぼ同時にそこでも固定したなど）なら開かない
+    if (slotsOf(others).includes(url)) continue;
     const index = insertIndex(next, slotsOf(others), url);
     const created = await chrome.tabs.create({
       windowId: win.id,
